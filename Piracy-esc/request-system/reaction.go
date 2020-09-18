@@ -1,3 +1,8 @@
+{{/*Made by Crenshaw#7860
+Trigger Type Reaction added
+This is the command that will detect a reaction and send the correct response and give rep.*/}}
+{{/*Adjust the Uplaodder and Booster role ID here*/}}
+
 {{$uploader:=733362574401339412}}
 {{$booster:=742769937126260819}}
 
