@@ -6,7 +6,7 @@ Just copy all of this and modify it aas needed*/}}
 {{$args := parseArgs 1 "-request <item name> -- <item description (optional)> `Ex: -request Generator Rex -- tv show 2010`"
 (carg "string" "name")}}
 {{$ReqChanID := 755561118990336141}}{{/*replace the numbers with the channel ID you want requests to go to*/}}
-{{$sect := "0ANfffJKx6vCrUk9PVA"}}{{/*your gdrive sector ID, if you need help re-read the README.md or DM me*/}}
+{{$sect := "sector id goes here no in:"}}{{/*your gdrive sector ID, if you need help re-read the README.md or DM me*/}}
  
 {{$split := (split (joinStr "" ($args.Get 0) "--") "--")}}
 {{$name := (index $split 0)}}
