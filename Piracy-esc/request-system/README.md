@@ -14,7 +14,7 @@ this the Uploader will have triggered the bot to __a.__ Notify the user thier re
 Delete the request/message from the request channel.
 
 __4.__ Optionally, you can have the Uploaders shown for who has the most uploads/rep, the topuploaders file is an exception to the 
-"ALL OF THESE COMMANDS MUST BE USED TOGETHER" rule.
+"All of these commands must be used together" rule.
  
 ### Booster Rep
 
