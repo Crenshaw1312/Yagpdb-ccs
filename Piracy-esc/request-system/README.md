@@ -2,6 +2,8 @@
 I made this because I got very tired of having to go to 1337x.to or The Pirate Bay to get a link and possibly risk my digital saftey.
 So I figured I'll make a request system that's easy to use, clean, promotes sever booting, and boosts sever community.
 
+__ALL OF THESE COMMANDS MUST BE USED TOGETHER__
+
 ## System Overview
 __1.__ Asumming you're using the regex provided (^-req(uest)?) the user will start by doing their request `-request <Item name>`
 
@@ -11,7 +13,8 @@ __3.__ Once an "Uploader" decides to upload, or has uploaded, the requested item
 this the Uploader will have triggered the bot to __a.__ Notify the user thier request have been done __b.__ Give the Uploader rep __c.__ 
 Delete the request/message from the request channel.
 
-__4.__ Optionally, you can have the Uploaders shown for who has the most uploads/rep
+__4.__ Optionally, you can have the Uploaders shown for who has the most uploads/rep, the topuploaders file is an exception to the 
+"ALL OF THESE COMMANDS MUST BE USED TOGETHER" rule.
  
 ### Booster Rep
 
