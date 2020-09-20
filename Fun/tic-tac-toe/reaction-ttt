@@ -1,44 +1,31 @@
 {{/*Made by Crenshaw#7860
-Triiger type Reaction (added only)
-Note: Disable error responses (at the bootom of page*/}}
+Trigger Tpye Regex: ^-(ttt|tic(-|\s)?tac(-|\s)?toe)
+I made this from inspiration of Specky Bot and my friend Haley.*/}}
 
-{{$ccID:=12}}{{/*this is for the cc number of the conversion-ttt command8/}}
-{{/*database of all the games*/}}
-{{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}
-{{$Games:=(split $Games "----")|(reReplace "--" $Games "")}}
-
-{{if and (reFind (toString .ReactionMessage.ID) $Games) (reFind (toString .Reaction.UserID) $Games) (eq (toString .ReactionMessage.Author) "YAGPDB.xyz#8760")}}
-	{{$Games:=split $Games "><"}}
-	{{/*Variables*/}}
-	{{$p1:=(index $Games 0)}}
-	{{$p2:=(index $Games 1)}}
-	{{$msgID:=(index $Games 2)}}
-	{{$chan:=(index $Games 3)}}
-	{{$user:=.User.ID}}
-	{{$message:=.ReactionMessage.Content}}
-	{{range .ReactionMessage.Reactions}}
-		{{if eq .Count 2}}
-{{/*setting up emoji information*/}}
-			{{$letnum:=reReplace ":" .Emoji.Name ""}}
-			{{execCC $ccID nil 0 $letnum}}
-			{{sleep 1}}
-			{{$number:=(dbGet 0 "letnum").Value}}
-{{/*Replacing number with emoji*/}}
-			{{if eq (toString $user) $p1}}
-				{{if eq (toString (dbGet 336 (joinStr "" $chan "XorO")).Value) "X"}}
-					{{editMessage nil $msgID (reReplace $number $message "X")}}
-					{{dbSet 336 (joinStr "" $chan "XorO") "O"}}
-					{{deleteMessageReaction nil $msgID  204255221017214977 .Emoji.Name}}
-				{{end}}
-			{{deleteMessageReaction nil $msgID  $user .Emoji.Name}}
-			{{else if eq (toString $user) $p2}}
-				{{if eq (toString (dbGet 336 (joinStr "" $chan "XorO")).Value) "O"}}
-					{{editMessage nil $msgID (reReplace $number $message "O")}}
-					{{dbSet 336 (joinStr "" $chan "XorO") "X"}}
-					{{deleteMessageReaction nil $msgID  204255221017214977 .Emoji.Name}}
-				{{end}}
-			{{end}}
+{{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}{{/*game info*/}}
+{{if ($Games)}}
+{{/*End game?*/}}
+	{{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}
+	{{if reFind (toString .User.ID) $Games}}
+		{{if reFind `(end|stop|close)` (index .CmdArgs 0)}}
+			{{dbDel 336  (joinStr "" .Channel.ID "ttt")}}
+			{{sendMessage nil "Game Ended, Thanks for playing!"}}
 		{{end}}
-		{{deleteMessageReaction nil $msgID  $user .Emoji.Name}}
+	{{end}}
+{{else}}
+
+	{{$args := parseArgs 1 "You need to ping your challenger!\n`-ttt @user`"
+(carg "userid" "player")}}
+
+	{{/*Start game?*/}}
+	{{if ($Games)}}
+	{{/*active ttt channel*/}}
+	     There is an already active game in this channel, try a different channel.
+	{{else}}
+	{{/*Creating a game*/}}
+		{{$id:=sendMessageRetID nil (joinStr "" "\n **Player 1:** " (userArg ($args.Get 0)).Mention  " **-** X **Player 2:**" .User.Mention " **-** O\n```\n 1 | 2 | 3\n-----------\n 4 | 5 | 6\n-----------\n 7 | 8 | 9 \n```\nRemember to do `-ttt end` when the game is over")}}
+		{{addMessageReactions nil $id ":one:" ":two:" ":three:" ":four:" ":five:" ":six:" ":seven:" ":eight:" ":nine:"}}
+		{{dbSet 336 (joinStr "" .Channel.ID "ttt") (joinStr "" "--" ((userArg ($args.Get 0)).ID) "><" .User.ID "><" $id "><" .Channel.ID "--")}}
+		{{dbSet 336 (joinStr "" .Channel.ID "XorO") "X"}}
 	{{end}}
 {{end}}
