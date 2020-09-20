@@ -6,3 +6,10 @@ This is a slow-ish command, between each reaction allow for a 1-1.5 second buffe
 `-ttt end` will end the current games.
 
 `Reaction` The game board will appear, react accordingly to where you would like your marker to land.
+
+## Coming soon
+`-ttt help` Provide basic info on tic-tac-toe
+
+`-ttt allend` Admin can end all exsisting games
+
+Make it an embed
