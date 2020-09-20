@@ -6,11 +6,7 @@ I made this from inspiration of Specky Bot and my friend Haley.*/}}
 {{if ($Games)}}
 {{/*End game?*/}}
 	{{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}
-	{{$Games:=(split $Games "----")|(reReplace "--" $Games "")}}
-	{{$Games:=split $Games "><"}}
-	{{$p1:=(index $Games 0)}}
-	{{$p2:=(index $Games 1)}}
-	{{if eq (toString .User.ID) $p1 $p2}}
+	{{if reFind (toString .User.ID) $Games}}
 		{{if reFind `(end|stop|close)` (index .CmdArgs 0)}}
 			{{dbDel 336  (joinStr "" .Channel.ID "ttt")}}
 			{{sendMessage nil "Game Ended, Thanks for playing!"}}
@@ -28,10 +24,10 @@ I made this from inspiration of Specky Bot and my friend Haley.*/}}
 	{{else if and (not (userArg ($args.Get 0)).Bot) (ne (toString (userArg ($args.Get 0)).ID) (toString .User.ID))}}
 {{/*Creating a game*/}}
 		{{sendMessage nil (joinStr "" "\n **Player 1:** " (userArg ($args.Get 0)).Mention  " **-** X **Player 2:**" .User.Mention " **-** O")}}
-		{{$id:=sendMessageRetID nil (joinStr "" "\n```\n 1 | 2 | 3\n-----------\n 4 | 5 | 6\n-----------\n 7 | 8 | 9 \n```\nRemember to do `-ttt end` when the game is over")}}
+		{{$id:=sendMessageRetID nil (joinStr "" "\n```\n 1 | 2 | 3\n-----------\n 4 | 5 | 6\n-----------\n 7 | 8 | 9\n```\nRemember to do `-ttt end` when the game is over")}}
 		{{addMessageReactions nil $id ":one:" ":two:" ":three:" ":four:" ":five:" ":six:" ":seven:" ":eight:" ":nine:"}}
 		{{dbSet 336 (joinStr "" .Channel.ID "ttt") (joinStr "" "--" ((userArg ($args.Get 0)).ID) "><" .User.ID "><" $id "><" .Channel.ID "--")}}
-		{{dbSet 336 (joinStr "" .Channel.ID "XorO") "X"}}/
+		{{dbSet 336 (joinStr "" .Channel.ID "XorO") "X"}}
 	{{else if eq (toString (userArg ($args.Get 0)).ID) (toString .User.ID)}}
 		You cannot play yourself, go make a new friend to join you!
 	{{else if (userArg ($args.Get 0)).Bot}}
