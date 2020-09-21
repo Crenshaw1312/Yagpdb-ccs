@@ -10,6 +10,8 @@ This is a slow-ish command, between each reaction allow for a 1-1.5 second buffe
 ## Coming soon
 `-ttt help` Provide basic info on tic-tac-toe
 
+Removal of the `reaction-ttt`
+
 A note that updates so you know who's turn it is
 
 `-ttt allend` Admin can end all exsisting games
