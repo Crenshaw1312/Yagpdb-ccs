@@ -2,7 +2,7 @@
 I made this because I got very tired of having to go to 1337x.to or The Pirate Bay to get a link and possibly risk my digital saftey.
 So I figured I'll make a request system that's easy to use, clean, promotes sever booting, and boosts sever community.
 
-__ALL OF THESE COMMANDS MUST BE USED TOGETHER__
+> __ALL OF THESE COMMANDS MUST BE USED TOGETHER__
 
 ## System Overview
 __1.__ Asumming you're using the regex provided (^-req(uest)?) the user will start by doing their request `-request <Item name>`
@@ -15,6 +15,9 @@ Delete the request/message from the request channel.
 
 __4.__ Optionally, you can have the Uploaders shown for who has the most uploads/rep, the topuploaders file is an exception to the 
 "All of these commands must be used together" rule.
+
+### Searching
+This commands comes with search query links to a couple of sites, you can toggle which ones you want shown/used in the request.go file. You can also just have no fields at all. If  you want another site added you can [join my discord server](https://discord.gg/2CGN4A9).
  
 ### Booster Rep
 
