@@ -1,8 +1,8 @@
 {{/*Made by Crenshaw#7860
-Trigger Tpye Regex: ^-(ttt|tic(-|\s)?tac(-|\s)?toe)
+Trigger Type: Reaction added
 I made this from inspiration of Specky Bot and my friend Haley.*/}}
 
-{{$ccID:=12}}{{/*replace this with the ccID of the conversion-tt command*/}}
+{{$ccID:=5}}{{/*replace this with the ccID of the conversion-tt command*/}}
 {{/*database of all the games*/}}
 {{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}
 {{$Games:=(split $Games "----")|(reReplace "--" $Games "")}}
