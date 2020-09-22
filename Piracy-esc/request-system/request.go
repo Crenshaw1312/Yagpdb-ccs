@@ -1,7 +1,8 @@
 {{/*Made by Crenshaw#7860
 Trigger type- Regex: ^-req(uest)?
-Just copy all of this and modify it aas needed*/}}
-{{$Fields:=true}}
+Just copy all of this and modify it as needed*/}}
+{{$Fields:=true}} {{/*Set to false if you don't want any search links*/}}
+{{/* Toggle to false for what searches you want*/}}
 {{$gdrive:=true}}  {{$1337x:=true}}
 {{$kickass:=true}}{{$rarbg:=true}}
 {{$IMDB:=true}}   {{$google:=true}}
