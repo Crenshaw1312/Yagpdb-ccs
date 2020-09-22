@@ -14,5 +14,5 @@ Please nothing too complex, I'm no pro I'm intermediate.
 ## Future Plans
 - [ ] Improve Tic-Tac-Toe game
 - [x] Make a request system
-- [ ] Make a Server Info Command
-- [ ] Make plugins for request embed
+- [x] Make a Server Info Command
+- [x] Make plugins for request embed
