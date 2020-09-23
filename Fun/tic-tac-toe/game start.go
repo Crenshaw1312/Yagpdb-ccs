@@ -1,12 +1,15 @@
 {{/*Made by Crenshaw#7860
 Trigger Tpye Regex: ^-(ttt|tic(-|\s)?tac(-|\s)?toe)
 I made this from inspiration of Specky Bot and my friend Haley.*/}}
+{{$mod:=755559646265081907}}{{/*ROLE that are considered mod*/}}
+{{$admin:=755559646265081907}}{{/*ROLE that are considered admin*/}}
 
+{{/*no touching*/}}
 {{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}{{/*game info*/}}
 {{if ($Games)}}
 {{/*End game?*/}}
 	{{$Games:=(toString (dbGet 336 (joinStr "" .Channel.ID "ttt")).Value)}}
-	{{if reFind (toString .User.ID) $Games}}
+	{{if or (hasRoleID $admin) (hasRoleID $mod) (reFind (toString .User.ID) $Games)}}
 		{{if reFind `(end|stop|close)` (index .CmdArgs 0)}}
 			{{dbDel 336  (joinStr "" .Channel.ID "ttt")}}
 			{{sendMessage nil "Game Ended, Thanks for playing!"}}
