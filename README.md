@@ -12,7 +12,4 @@ Please nothing too complex, I'm no pro I'm intermediate.
 [Crenshaw's server](https://discord.gg/2CGN4A9)
 
 ## Future Plans
-- [ ] Improve Tic-Tac-Toe game
-- [x] Make a request system
-- [x] Make a Server Info Command
-- [x] Make plugins for request embed
+I need new one ones!
