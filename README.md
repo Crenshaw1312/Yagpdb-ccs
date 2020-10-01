@@ -1,3 +1,5 @@
+# Temp-Closed
+I got hacked... end of story... please hold
 # Yagpdb-ccs
 ## Uhh Welcome?
 So here you can find some custom commands to add to your guild/sever to do stuff.
