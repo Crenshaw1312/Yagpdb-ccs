@@ -1,3 +1,7 @@
+{{/*Command type: Command/Mention "guide"
+    Usage: -guide 
+    This command provides a embed that will lead you down a path so that you dont have to always tell people good sites
+*/}}
 {{$e := cembed 
 "title" (title "What Path?")
 "description"  (joinStr "" "```css\n\n#1 [Books] eBooks audioBooks Manga Comics Magazines \n#2 [Movies and TV] DDL+Torrent Streaming Apps\n#3 [Games] General android+ios Bad+Sites\n#4 [Software] Download+Tools Torrent\n```")
