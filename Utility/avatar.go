@@ -11,6 +11,6 @@
 {{sendMessage nil (cembed
 	"title" (joinStr "" (printf "%s" $user.String))
 	"image" (sdict "url" ($user.AvatarURL "128"))
-	"color" 123
+	"color" 0x4B0082
     "footer" (sdict "text" (joinStr "" "Requested by " .User.String))
 )}}
