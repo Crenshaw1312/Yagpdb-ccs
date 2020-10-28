@@ -1,5 +1,7 @@
 {{/*Made by Crenshaw#7860
-	Based/Learned from jo3l"s*/}}
+Based/Learned from jo3l"s
+Trigger Type: command
+trigger: avatar*/}}
 {{$user := .User}}
 {{$args := parseArgs 0 "`-avatar <user>`"
 (carg "userid" "user")}}
