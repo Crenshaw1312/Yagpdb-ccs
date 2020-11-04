@@ -4,7 +4,7 @@
 	{{$args := parseArgs 2 "gdrive <file type> <file name> *The File types are* `folder`-`video`-`image`-`pdf`-`drawing`-`audio`-`archive`-`form`-`document`-`spreadsheet`-`presentation`"
 	(carg "string" "File type")
 	(carg "string" "File Name")}}
-	{{$gdriveID:="0ACBAa6Gbh8CFUk9PVA"}}
+	{{$gdriveID:="uharIIUEhaoarf0A"}}
 	{{$link := (reReplace " " (joinStr "" "https://drive.google.com/drive/u/0/search?q=type:" ($args.Get 0) "%20" ($args.Get 1) "%20in:" $gdriveID) "%20")}}
 	
 	 {{if reFind `(folder|video|image|pdf|drawing|audio|archive|form|document|spreadsheet|presentation)` ($args.Get 0)}}
