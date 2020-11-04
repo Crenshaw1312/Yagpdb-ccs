@@ -1,3 +1,5 @@
+{{/* made by Joe_#001 */}}
+
 {{ define "standardize" }}
     {{ $kind := kindOf .Value true }}
     {{ $typ := printf "%T" .Value }}
