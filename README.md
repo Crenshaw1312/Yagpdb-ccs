@@ -1,5 +1,3 @@
-# Temp-Closed
-I got hacked... end of story... please hold
 # Yagpdb-ccs
 ## Uhh Welcome?
 So here you can find some custom commands to add to your guild/sever to do stuff.
@@ -11,7 +9,7 @@ if you ever need help with making a server or want a decent custom command feel 
 Please nothing too complex, I'm no pro I'm intermediate.
 
 ### My Info
-[Crenshaw's server](https://discord.gg/2CGN4A9)
+[Crenshaw's server](https://takeb1nzyto.space/)
 
 ## Future Plans
 I need new one ones!
