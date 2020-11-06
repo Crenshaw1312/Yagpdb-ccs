@@ -28,7 +28,7 @@ Edit, addalias, deletealias, add, and delete all tags*/}}
 
 {{/*CUSTOMIZATION ENDS*/}}
  
-{{{$isCreator:=false}}
+{{$isCreator:=false}}
 {{range .Member.Roles}} {{if in $tagCreator .}}{{$isCreator = true}}{{end}}{{end}} 
  
 {{$isCmd:=reFind "^tags? *" .StrippedMsg}}
