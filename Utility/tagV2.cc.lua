@@ -28,7 +28,7 @@ Edit, addalias, deletealias, add, and delete all tags*/}}
 
 {{/*CUSTOMIZATION ENDS*/}}
  
-{{{$isCreator:=false}}
+{{$isCreator:=false}}
 {{range .Member.Roles}} {{if in $tagCreator .}}{{$isCreator = true}}{{end}}{{end}} 
  
 {{$isCmd:=reFind "^tags? *" .StrippedMsg}}
@@ -101,7 +101,7 @@ Edit, addalias, deletealias, add, and delete all tags*/}}
 			{{end}}
 			{{sendMessage nil (cembed
 				"title" "❯ Tag Info"
-				"color" 14232643
+				"color" 0x4b0082
 				"fields" (cslice
 					(sdict "name" "❯ Name" "value" (index $aliases 0))
 					(sdict "name" "❯ Aliases" "value" (or $list "n/a"))
