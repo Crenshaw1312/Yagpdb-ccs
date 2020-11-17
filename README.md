@@ -10,7 +10,7 @@ if you ever need help with making a server or want a decent custom command feel 
 Please nothing too complex, I'm no pro I'm intermediate.
 
 ### My Info
-[Crenshaw's server](https://takeb1nzyto.space/)
+[Crenshaw's server](https://discord.gg/y3BH7rr74w)
 
 ## Future Plans
 I need new one ones!
