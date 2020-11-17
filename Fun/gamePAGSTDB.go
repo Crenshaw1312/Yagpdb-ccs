@@ -1,4 +1,5 @@
 {{/*
+    
 Trigger Type: Command (Prefix/Mention)
 Trigger: game
 
