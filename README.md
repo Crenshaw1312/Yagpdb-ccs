@@ -1,5 +1,6 @@
-# Yagpdb-ccs
+# Yagpdb+Pagstdb-ccs
 I have a star owo?
+paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs pag!
 ## Uhh Welcome?
 So here you can find some custom commands to add to your guild/sever to do stuff.
 some of my personal favorites is picture and maze, both are under fun.
