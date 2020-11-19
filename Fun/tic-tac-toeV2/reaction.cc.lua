@@ -1,8 +1,4 @@
-{{/*
-Trigger ttype: Reaction
-Trigger: reaction added only
-*/}}
-
+{{/* Thanks to Devonte#0745 for helping me fix the rePlay */}}
 {{ define "findWin" }}
 	{{ $wins := cslice "1️⃣-2️⃣-3️⃣" "4️⃣-5️⃣-6️⃣" "7️⃣-8️⃣-9️⃣" "1️⃣-4️⃣-7️⃣" "2️⃣-5️⃣-8️⃣" "7️⃣-5️⃣-3️⃣" "3️⃣-6️⃣-9️⃣" "1️⃣-5️⃣-9️⃣" }}
 	{{ $.Set "Result" false }}
@@ -14,15 +10,34 @@ Trigger: reaction added only
 		{{ end }}
 	{{ end }}
 {{ end }}
- 
+
+{{ define "rePlay" }}
+{{/* .Embed, .Data, .ReactionMessage(Message tho)*/}}
+	{{ sleep 3 }}
+	{{ .Embed.Set "Description" "```\n1️⃣|2️⃣|3️⃣\n---------\n4️⃣|5️⃣|6️⃣\n---------\n7️⃣|8️⃣|9️⃣\n```" }}
+	{{ editMessage nil .Message.ID (cembed .Embed) }}
+	{{ range (seq 1 10) }}
+		{{ if le . (len $.Data.Player2.Plays) }}
+			{{ $.Embed.Set "Description" (reReplace (index $.Data.Player2.Plays (sub . 1)) $.Embed.Description $.Data.Player2.Marker ) }}
+			{{ editMessage nil $.Message.ID (cembed $.Embed) }}
+			{{ sleep 1 }}
+		{{ end }}
+		{{ if le . (len $.Data.Player1.Plays) }}
+			{{ $.Embed.Set "Description" (reReplace (index $.Data.Player1.Plays (sub . 1)) $.Embed.Description $.Data.Player1.Marker ) }}
+			{{ editMessage nil $.Message.ID (cembed $.Embed) }}
+			{{ sleep 1 }}
+		{{ end }}
+	{{ end }}
+{{ end }}
+
 {{ if (dbGet .ReactionMessage.ID "tictactoe").Value }}
- 
+
 {{/* setting up variables */}}
 	{{ $data:=sdict (dbGet .ReactionMessage.ID "tictactoe").Value }}
 	{{ $data.Set "Available" ((cslice).AppendSlice $data.Available) }}
 	{{ $embed := structToSdict (index .ReactionMessage.Embeds 0) }}
 	{{ $player := false }} {{ $opponent := false}}
- 
+
 {{/* finder what player the current user is and setting up opponent*/}}
 	{{ if and (eq (toInt $data.Player1.ID) .User.ID) (eq $data.Turn "player1") }}
 		{{ $player = sdict $data.Player1}}
@@ -31,11 +46,11 @@ Trigger: reaction added only
 	{{ else if and (eq (toInt $data.Player2.ID) .User.ID) (eq $data.Turn "player2") }}
 		{{ $player = sdict $data.Player2}}
 		{{ $player.Set "Plays" ((cslice).AppendSlice $player.Plays) }} {{ $data.Set "Turn" "player1" }} {{ $data.Set "Player2" $player }}
-		{{ $opponent = $data.Player1.ID }}{{ $opponent = (getMember $opponent).User }}
+		{{ $opponent = $data.Player1.ID }} {{ $opponent = (getMember $opponent).User }}
 	{{ else }}
 		{{ deleteMessageReaction nil .ReactionMessage.ID .User.ID .Reaction.Emoji.Name }}
 	{{ end }}
- 
+
 {{/* updating board*/}}
 	{{ if and $player (eq .Reaction.Emoji.Name "1️⃣" "2️⃣" "3️⃣" "4️⃣" "5️⃣" "6️⃣" "7️⃣" "8️⃣" "9️⃣")}}
 		{{ deleteMessageReaction nil .ReactionMessage.ID .User.ID .Reaction.Emoji.Name }}
@@ -43,14 +58,14 @@ Trigger: reaction added only
 		{{ $embed.Set "Description" (reReplace .Reaction.Emoji.Name $embed.Description $player.Marker) }}
 		{{ $embed.Set "Footer" (sdict "text" (print $opponent.Username "'s turn") "icon_url" ($opponent.AvatarURL "256")) }}
 		{{ editMessage nil .ReactionMessage.ID (cembed $embed) }}
- 
+
 {{/*updating plays*/}}
 		{{ $available := cslice }}
 		{{ range $data.Available }}
 			{{ if ne . $.Reaction.Emoji.Name }}
 				{{ $available = $available.Append .}}
 			{{ else if eq  . $.Reaction.Emoji.Name }}
-				{{ $player.Set "Plays" (($player.Plays).Append .) }}
+				{{ $player.Set "Plays" ($player.Plays.Append .) }}
 			{{ end }}
 		{{ end }}
 		{{ $data.Set "Available" $available }}
@@ -61,8 +76,8 @@ Trigger: reaction added only
 		{{ end }}
 		{{ $findWin := (sdict "Player" $player)}}
 		{{ template "findWin" $findWin }}
- 
-{{/* Try to find a win/Tie */}}
+
+{{/* Dealing with win/Tie */}}
 		{{ if $findWin.Result }}
 			{{ $embed.Del "Description" }} {{ $embed.Del "Title" }} {{ $embed.Set "Footer" (sdict "text" (print .User.Username " Won!") "icon_url" (.User.AvatarURL "256")) }}
 			{{ deleteAllMessageReactions nil .ReactionMessage.ID }}
@@ -70,6 +85,8 @@ Trigger: reaction added only
 			{{ dbDel .ReactionMessage.ID "tictactoe" }}
 			{{ $stats := sdict (dbGet .User.ID "tictactoe").Value }} {{ $stats.Set "Won" (add (toInt $stats.Wins) 1) }} {{ dbSet .User.ID "tictactoe" $stats }}
 			{{ $stats := sdict (dbGet $opponent.ID "tictactoe").Value }} {{ $stats.Set "Lost" (add (toInt $stats.Lost) 1) }} {{ dbSet $opponent.ID "tictactoe" $stats }}
+			{{ $data := sdict "Data" $data "Message" .ReactionMessage "Embed" $embed }}
+			{{ template "rePlay" $data }}
 		{{ else if or (eq (len $data.Available) 0) (eq (len .ReactionMessage.Reactions) 0) }}
 			{{ $embed.Del "Description" }} {{ $embed.Del "Title" }} {{ $embed.Set "Footer" (sdict "text" "Tie!") }}
 			{{ editMessage nil .ReactionMessage.ID (cembed $embed) }}
@@ -77,6 +94,8 @@ Trigger: reaction added only
 			{{ range (cslice .User $opponent) }}
 				{{ $stats := sdict (dbGet .ID "tictactoe").Value }} {{ $stats.Set "Tied" (add (toInt $stats.Tied) 1) }} {{ dbSet .ID "tictactoe" $stats }}
 			{{ end }}
+			{{ $data := sdict "Data" $data "Message" .ReactionMessage "Embed" $embed }}
+			{{ template "rePlay" $data }}
 		{{ else }}
 			{{ dbSetExpire .ReactionMessage.ID "tictactoe" $data (toInt64  ((dbGet .Channel.ID "tictactoe").ExpiresAt.Sub currentTime).Seconds) }}
 		{{ end }}
