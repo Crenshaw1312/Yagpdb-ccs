@@ -110,10 +110,10 @@ Usage:
 		"Title" "Tic-Tac-Toe"
 		"Thumbnail" (sdict "url" "https://cdn.discordapp.com/attachments/769320349078650932/776922976557465620/how-to-build-simple-tic-tac-toe-game-with-react-blog.webp")
 		"Description" (joinStr "\n\n"
-			"`+ttt stats [member]` Get a user's stats."
-			"`+ttt setMarker <1/2> <standard emoji>` Set your marker to something besides :x: or :o:."
-			"`+ttt play <mention>` Play tic-tac-toe with someone!"
-			"`+ttt reset` Reset all of your stats, marker(s) and play score(s)."
+			"`ttt stats [member]` Get a user's stats."
+			"`ttt setMarker <1/2> <standard emoji>` Set your marker to something besides :x: or :o:."
+			"`ttt play <mention>` Play tic-tac-toe with someone!"
+			"`ttt reset` Reset all of your stats, marker(s) and play score(s)."
 		)
 		"Footer" (sdict "icon_url" (.User.AvatarURL "256") "text" (print "Requested by " .User.String))
 		"Color" 0x4B0082
