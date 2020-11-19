@@ -1,4 +1,12 @@
-{{/* Thanks to Devonte#0745 for helping me fix the rePlay */}}
+{{/*
+Trigger Type: Reaction
+Trigger: Added Only
+
+Usage:
+using `ttt play @user` ing the other command, you react to play the game!
+
+Thanks to Devonte#0745 for helping me fix the rePlay 
+*/}}
 {{ define "findWin" }}
 	{{ $wins := cslice "1️⃣-2️⃣-3️⃣" "4️⃣-5️⃣-6️⃣" "7️⃣-8️⃣-9️⃣" "1️⃣-4️⃣-7️⃣" "2️⃣-5️⃣-8️⃣" "7️⃣-5️⃣-3️⃣" "3️⃣-6️⃣-9️⃣" "1️⃣-5️⃣-9️⃣" }}
 	{{ $.Set "Result" false }}
