@@ -57,7 +57,7 @@ Edit, addalias, deletealias, add, and delete all tags*/}}
 			{{if not $data.Tag}}
 				{{$attachment:=""}}
 				{{with .Message.Attachments}}
-					{{if reFind `\.(png|gif|jpeg|jpg|gifv)` (index . 0).FIlename}}
+					{{if reFind `\.(png|gif|jpeg|jpg|gifv)` (index . 0).Filename}}
 						{{$attachment =(index . 0).URL}}
 					{{else}}
 						Invalid file type for image.
