@@ -1,6 +1,7 @@
 # Yagpdb+Pagstdb-ccs
 ERMAGERD? I HAVE THREE STARS?!
-paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs pag!
+
+paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs pag under languages 
 
 ## To Do
 - [ ] Mod Creafter's CC command with more customizability (or just make my own)
