@@ -1,29 +1,27 @@
 {{/*
-	Made by Joe_#0001 and Crenshaw#1312
-	This command manages the tag system.
-  This also has all the same features as the orignal tag system... but better.
-	Changes: Syntax
-			 better color (indigo)
-			 new `;tag list` appearence
-			 RoleFilterilter on tag management
-			 Response is now an embed
-			 Each sub command has more options
-	Usage: 
+Made by: Joe_#0001
+Modded by: Crenshaw#1312
 
-	`;tag add/create <name> <value>`
-	`;tag del/delete/remove <name>`
-	`;tag (add/create)alias(es) <name> <...aliases>`
-	`;tag (del/delete/remove)alias(es) <name> <alias>`
-	`;tag list/show/all`
-	`;tag info/information/about <name>`
-	`;tag syntax
-	`;<tag>` (i.e say you have tag with name `foobar`, `;foobar` would view that tag)
+Note* do `tag` to see all sub-commands
+		
+Trigger Type: Starts With
+Reccomended Trigger: ;
 
-	Recommended trigger: StartsWith trigger with trigger `;`.
+Allows: YAGPDB and PAGSTDB
+
+Changes:
+- Now embeds
+- Indigo color
+- Restrict who can make tags (by role)
+- Better `tag list` command (codeblock and color coated)
+	+ this allowed the removal of a sub-command `tag info`
+- Image support
+- Syntax 
+	+ do `tag syntax` to see available syntax
 */}}
+
 {{/*CUSTOMIZATION*/}}
-{{/*The people with the following roleIDs will be able to:
-Edit, addalias, deletealias, add, and delete all tags*/}}
+{{/*The people with the following roleIDs will be able to manage tags*/}}
 {{ $tagCreator := cslice 770291866208829470 }}
 
 {{/*CUSTOMIZATION ENDS*/}}
@@ -251,6 +249,7 @@ Edit, addalias, deletealias, add, and delete all tags*/}}
 				"`tag info <tag>`: Info on a given tag."
 				"`tag list`: Lists all tags."
 				"`tag syntax`: List of available syntax."
+				"`<tagname>`: Fetch said tag."
 			)
 			"footer" (sdict "text" (print "Requested by " $.User.Username) "icon_url" ($.User.AvatarURL "256"))
 			"color" 0x4B0082
