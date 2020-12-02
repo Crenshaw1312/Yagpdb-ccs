@@ -50,7 +50,7 @@ Allows: PAGSTDB and YAGPDB
 }}
 
 {{/* adding the reactions */}}
-{{- if and (ge (len .CmdArgs) 3) (reFind `^[^\|_%]{1,25}$` $title) -}}
+{{- if and (ge (len .CmdArgs) 3) (reFind `^[^\|_%]{1,50}$` $title) -}}
 	{{ $id := sendMessageRetID nil (cembed $poll) }}
 	{{ range $_, $value := $emojis }}
 		{{ addMessageReactions nil $id $value }}
@@ -61,5 +61,5 @@ Allows: PAGSTDB and YAGPDB
 {{ else }}
 Please provide at least three args:
 `-poll create <title> <opt1> <opt2>`
-> Note: Titles cannot contain `_`, `%`, or `|` and a max of **25** characters.
+> Note: Titles cannot contain `_`, `%`, or `|` and a max of **50** characters.
 {{ end }}
