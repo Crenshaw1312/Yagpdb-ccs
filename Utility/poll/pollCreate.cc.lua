@@ -61,5 +61,5 @@ Allows: PAGSTDB and YAGPDB
 {{ else }}
 Please provide at least three args:
 `-poll create <title> <opt1> <opt2>`
-> Note: Titles cannot contain `_`, `%`, or `|`.
+> Note: Titles cannot contain `_`, `%`, or `|` and a max of **25** characters.
 {{ end }}
