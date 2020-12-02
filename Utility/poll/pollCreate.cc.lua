@@ -11,6 +11,7 @@ Requirements: pollDelete.cc.lua
   (optional)  pollList.cc.lus
 
 Note: You cant use both -single and -multiple flags at once
+Note: using more then 6 or so unicode emojis in your title will preak it.
 		
 Allows: PAGSTDB and YAGPDB
 */}}
