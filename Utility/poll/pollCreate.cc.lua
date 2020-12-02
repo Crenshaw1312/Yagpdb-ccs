@@ -1,6 +1,6 @@
 {{/*
 Made by: Crenshaw#1312
-Thanks: DZ#6669 Reason: Made regex
+Thanks: DZ#6669 Reason: Made regex, ("[^"]*")|([^"\s]*)
 
 Trigger Type: regex
 Trigger: \A-poll\s?(c(reate)?|start|begin|make)
