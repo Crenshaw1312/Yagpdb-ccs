@@ -29,9 +29,9 @@ Allows: PAGSTDB and YAGPDB
 {{/*making the display and title*/}}
 {{ $title := 0 }} {{ $display := "" }} {{ $emojis := cslice }}
 {{ range $index, $value := $items }}
-	{{ if (reFind `^-s(ingle)?$` .StrippedMsg) }}
+	{{ if (reFind `^-s(ingle)?$` $.StrippedMsg) }}
 		{{ $type = "single" }}
-	{{ else if (reFind `^-m(ultiple)?\s?$` .StrippedMsg) }}
+	{{ else if (reFind `^-m(ultiple)?\s?$` $.StrippedMsg) }}
 		{{ $type = "multiple" }}
 	{{ else if not $title }}
 		{{ $title = $value }}
