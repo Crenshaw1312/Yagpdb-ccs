@@ -14,6 +14,14 @@ Note: must be run in same channel as poll
 Allows: YAGPRB and PAGSTDB
 */}}
  
+{{/*
+Made by: Crenshaw1312
+Trigger Type: Regex
+Trigger: \A-poll\s?(end|stop|results)
+ 
+Requirements: https://github.com/Crenshaw1312/Yagpdb-ccs/blob/master/Utility/poll.cc.lua
+*/}}
+ 
 {{/*CONFIGURATION VALUES START*/}}
 {{ $delPoll := false }} {{/*weather or not to delete the poll once you end it*/}}
 {{/*CONFIGURATION VALUES END*/}}
