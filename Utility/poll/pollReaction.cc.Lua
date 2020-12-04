@@ -9,12 +9,11 @@ Requirements: pollCreate.cc.lua
    (optionla) pollList.cc.lua
 */}}
 
-{{ $allPolls := dbTopEntries "poll|%%|%%" 100 0 }}
-{{ range $allPolls }}
+{{ range ($allPolls := dbTopEntries "poll|%%|%%|%%|%%" 100 0) }}
 {{/*Make variables+set up*/}}
 	{{ $_ := split (slice .Key 5) "|" }}
-{{ $title := index $_ 1 }} {{ $msgID := toInt (index $_ 0) }} {{ $hasVoted := false}} {{ $value := (cslice).AppendSlice .Value }} {{ $type := index $value 0 }}
-{{ if eq (toInt $msgID) (toInt $.ReactionMessage.ID) }}
+{{ $chanID := toInt (index $_ 0) }} {{ $msgID := toInt (index $_ 1) }} {{ $title := index $_ 2 }} {{ $type := index $_ 3 }} {{ $hasVoted := false}} {{ $value := (cslice).AppendSlice .Value }}
+{{ if and (not $.User.Bot) (eq (toInt $msgID) (toInt $.ReactionMessage.ID)) }}
 {{/*Has the user voted?*/}}
 		{{ range $value }}
 			{{- if eq (toString $.User.ID) (toString .) -}}
@@ -32,7 +31,7 @@ Requirements: pollCreate.cc.lua
 				{{ $oldVotes := $value}} {{ $value = (cslice) }}
 				{{- range $oldVotes -}}
 					{{- if ne (toString $.User.ID) (toString .) -}}
-						{{ $value = $value.Append . }}
+						{{- $value = $value.Append (toString .) -}}
 					{{ end }}
 				{{- end -}}
 			{{ end }}
