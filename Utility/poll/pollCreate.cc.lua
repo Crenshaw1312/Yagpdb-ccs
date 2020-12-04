@@ -65,9 +65,11 @@ Allows: PAGSTDB and YAGPDB, only tested on PAGSTDB
 	{{ end }}
  
 {{/*Saving the poll*/}}
-	{{- dbSet 0 (print "poll|" $id "|" $title) (cslice $type) -}}
+	{{- dbSet 0 (print "poll|" .Channel.ID "|" $id "|" $title "|" $type) (cslice) -}}
 {{ else }}
 Please provide at least three args:
 `-poll create <title> <opt1> <opt2>`
 > Note: Titles cannot contain `_`, `%`, or `|`.
 {{ end }}
+                                  
+                                                
