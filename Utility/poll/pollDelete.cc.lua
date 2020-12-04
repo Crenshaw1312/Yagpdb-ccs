@@ -1,6 +1,7 @@
 {{/*
 Made by: Crenshaw1312
-
+Credit: Piter#2105
+		
 Trigger Type: Regex
 Trigger: \A-poll\s?(end|stop|results)
  
@@ -30,15 +31,19 @@ Allows: YAGPRB and PAGSTDB
 
 {{/* getting the poll */}}
 	{{ $res := dbTopEntries (print "poll|%%|" $msgID "|" $title "|%%") 1 0 }}
-	{{ if eq (len $res) 1 }}
+	{{ if eq (len $res) 1 }} {{ $counter := 0 }}{{ $percents := 0 }}
 		{{ $res = (index $res 0)}}
 		{{ dbDel $res.UserID $res.Key }}
 		{{ $_ := split (slice $res.Key 5) "|" }}
 		{{ $chanID := toInt (index $_ 0) }} {{ $msgID := toInt (index $_ 1) }} {{ $title := index $_ 2 }} {{ $type := index $_ 3 }} {{ $display := "" }}
 		{{ $poll := getMessage $chanID $msgID }}
+		{{- range $poll.Reactions -}}
+			{{ $counter = add $counter (sub .Count 1) }}
+		{{- end -}}
 		{{ $items := (split (index $poll.Embeds 0).Description "\n") }}
 		{{ range $index, $value := $poll.Reactions }}
-			{{ $display = print $display "\n" (index $items $index) "** ›› **`Count: " (sub $value.Count 1) "`" }}
+			{{ $percents = printf "%.0f%%" (round (fdiv (sub $value.Count 1) $counter|mult 100.0)) }}
+			{{ $display = print $display "\n" (index $items $index) "** ›› **`" (sub $value.Count 1) " (" $percents ")`" }}
 		{{ end }}
 		{{ if $delPoll }}
 			{{ deleteMessage $chanID $msgID 0 }}
