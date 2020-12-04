@@ -16,8 +16,9 @@ Allows: YAGPRB and PAGSTDB
  
 {{/*CONFIGURATION VALUES START*/}}
 {{ $delPoll := false }} {{/*weather or not to delete the poll once you end it*/}}
+{{ $logPoll := 778312013918371851 }} {{/*channel to send poll resaults to, .Channel.ID or nil for channel where command is triggered*/}}
 {{/*CONFIGURATION VALUES END*/}}
- 
+
 {{ if and (reFind `^<#\d{18}>$` (index .CmdArgs 0)) (ge (len .CmdArgs) 2) }}
 	{{ $title := "%%" }} {{ $msgID := "%%" }} {{ $chanID := "%%" }}
 		{{ $chanID = index .CmdArgs 0 }}
@@ -26,7 +27,7 @@ Allows: YAGPRB and PAGSTDB
 		{{ else }}
 			{{ $title = joinStr " " (slice .CmdArgs 1) }}
 		{{ end }}
- 
+
 {{/* getting the poll */}}
 	{{ $res := dbTopEntries (print "poll|%%|" $msgID "|" $title "|%%") 1 0 }}
 	{{ if eq (len $res) 1 }}
@@ -42,20 +43,21 @@ Allows: YAGPRB and PAGSTDB
 		{{ if $delPoll }}
 			{{ deleteMessage $chanID $msgID 0 }}
 		{{ end }}
-		{{ sendMessage nil (cembed 
+		{{ sendMessage $logPoll (cembed 
 			"Title" (print "Resaults for " $title)
             "Description" $display
 			"Color" 0x4B0083
             "Timestamp" $poll.Timestamp
-			"Footer" (sdict "text" (print "Poll was made on") )
+			"Footer" (sdict "text" (print "Poll was made") )
 		) }}
+		{{ sendMessage nil "Done :thumbsup:" }}
 {{/* no resaults */}}
 	{{ else }}
 		No polls found with that search, try using the message ID instead.
 	{{ end }}
- 
+
 {{/*error message*/}}
 {{ else }}
-Please provide the channel and __name__ or __message ID__ of the poll you want to end.
+Please provide the __name__ or __message ID__ of the poll you want to end.
 example: `-poll end <channel mention> <message ID/title>`
-{{ end }} 
+{{ end }}
