@@ -17,6 +17,7 @@ Note: Single mode does not work do to a bug on PAGSTDB and YAGPDB
 Allows: PAGSTDB and YAGPDB, only tested on PAGSTDB
 */}}
 
+
 {{/*CONFIGURATION VALUES STARTS*/}}
 {{ $type := "single" }} {{/*<sultipule/single>, default poll setting*/}}
 {{ $nums := cslice "1️⃣" "2️⃣" "3️⃣" "4️⃣" "5️⃣" "6️⃣" "7️⃣" "8️⃣" "9️⃣" }} {{/*emojis used for polls, at least 2*/}}
@@ -28,16 +29,19 @@ Allows: PAGSTDB and YAGPDB, only tested on PAGSTDB
 	{{ $items = $items.Append (reReplace "\"" . "") }}
 {{ end }}
  
+{{/*Type of poll*/}}
+{{ if (reFind `-s(ingle)?\s?$` $.StrippedMsg) }}
+	{{ $type = "single" }}
+{{ else if (reFind `-m(ultiple)?\s?$` $.StrippedMsg) }}
+	{{ $type = "multiple" }}
+{{ end }}
+ 
 {{/*making the display and title*/}}
 {{ $title := 0 }} {{ $display := "" }} {{ $emojis := cslice }}
 {{ range $index, $value := $items }}
-	{{- if (reFind `^-s(ingle)?$` $.StrippedMsg) -}}
-		{{ $type = "single" }}
-	{{- else if (reFind `^-m(ultiple)?\s?$` $.StrippedMsg) -}}
-		{{ $type = "multiple" }}
-	{{ else if not $title }}
+	{{ if not $title }}
 		{{ $title = $value }}
-	{{ else if le $index (len $nums) }}
+{{ else if and (le $index (len $nums)) (not (reFind `^(-m(ultiple)?|-s(ingle)?)\s?` $value)) }}
 		{{ $emoji := index $nums (sub $index 2) }}
 		{{ $display = print $display "\n" $emoji " **›** " $value }}
 		{{ $emojis = $emojis.Append $emoji }}
@@ -46,7 +50,7 @@ Allows: PAGSTDB and YAGPDB, only tested on PAGSTDB
  
 {{/*Sending the poll*/}}
 {{ $poll := sdict 
-	"Title" $title
+  "Title" (toString $title)
 	"Description" $display
 	"Color" 0x4B0082
 	"Timestamp" currentTime
@@ -54,7 +58,7 @@ Allows: PAGSTDB and YAGPDB, only tested on PAGSTDB
 }}
  
 {{/* adding the reactions */}}
-{{- if and (ge (len .CmdArgs) 3) (reFind `^[^\|_%]{1,100}$` $title) -}}
+{{- if and (ge (len .CmdArgs) 3) (reFind `^[^\|_%]{1,100}$` (toString $title)) -}}
 	{{ $id := sendMessageRetID nil (cembed $poll) }}
 	{{ range $_, $value := $emojis }}
 		{{ addMessageReactions nil $id $value }}
