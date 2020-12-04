@@ -14,41 +14,33 @@ Note: must be run in same channel as poll
 Allows: YAGPRB and PAGSTDB
 */}}
  
-{{/*
-Made by: Crenshaw1312
-Trigger Type: Regex
-Trigger: \A-poll\s?(end|stop|results)
- 
-Requirements: https://github.com/Crenshaw1312/Yagpdb-ccs/blob/master/Utility/poll.cc.lua
-*/}}
- 
 {{/*CONFIGURATION VALUES START*/}}
 {{ $delPoll := false }} {{/*weather or not to delete the poll once you end it*/}}
 {{/*CONFIGURATION VALUES END*/}}
  
-{{ if ge (len .CmdArgs) 1 }}
-	{{ $byTitle := true }} {{ $title := "%%" }} {{ $msgID := "%%" }}
-	{{ if reFind `^\d{18}$` (index .CmdArgs 0) }}
-		{{ $byTitle = false }}
-		{{ $msgID = index .CmdArgs 0 }}
-	{{ else }}
-		{{ $title = joinStr " " .CmdArgs }}
-	{{ end }}
+{{ if and (reFind `^<#\d{18}>$` (index .CmdArgs 0)) (ge (len .CmdArgs) 2) }}
+	{{ $title := "%%" }} {{ $msgID := "%%" }} {{ $chanID := "%%" }}
+		{{ $chanID = index .CmdArgs 0 }}
+		{{ if reFind `^\d{18}$` (index .CmdArgs 1) }}
+			{{ $msgID = index .CmdArgs 1 }}
+		{{ else }}
+			{{ $title = joinStr " " (slice .CmdArgs 1) }}
+		{{ end }}
  
 {{/* getting the poll */}}
-	{{ $res := dbTopEntries (print "poll|" $msgID "|" $title) 1 0 }}
+	{{ $res := dbTopEntries (print "poll|%%|" $msgID "|" $title "|%%") 1 0 }}
 	{{ if eq (len $res) 1 }}
 		{{ $res = (index $res 0)}}
 		{{ dbDel $res.UserID $res.Key }}
 		{{ $_ := split (slice $res.Key 5) "|" }}
-		{{ $title = index $_ 1 }} {{ $msgID = index $_ 0 }} {{ $display := "" }}
-		{{ $poll := getMessage nil $msgID }}
+		{{ $chanID := toInt (index $_ 0) }} {{ $msgID := toInt (index $_ 1) }} {{ $title := index $_ 2 }} {{ $type := index $_ 3 }} {{ $display := "" }}
+		{{ $poll := getMessage $chanID $msgID }}
 		{{ $items := (split (index $poll.Embeds 0).Description "\n") }}
 		{{ range $index, $value := $poll.Reactions }}
 			{{ $display = print $display "\n" (index $items $index) "** ›› **`Count: " (sub $value.Count 1) "`" }}
 		{{ end }}
 		{{ if $delPoll }}
-			{{ deleteMessage nil $msgID 0 }}
+			{{ deleteMessage $chanID $msgID 0 }}
 		{{ end }}
 		{{ sendMessage nil (cembed 
 			"Title" (print "Resaults for " $title)
@@ -64,5 +56,6 @@ Requirements: https://github.com/Crenshaw1312/Yagpdb-ccs/blob/master/Utility/pol
  
 {{/*error message*/}}
 {{ else }}
-Please provide the __name__ or __message ID__ of the poll you want to end.
-{{ end }}
+Please provide the channel and __name__ or __message ID__ of the poll you want to end.
+example: `-poll end <channel mention> <message ID/title>`
+{{ end }} 
