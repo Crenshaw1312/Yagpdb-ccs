@@ -82,7 +82,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 
 {{/* Special handling for video/article embeds »» coming soon! */}}
 
-{{/*send n' save the message!*/}}
+{{/*send n save the message!*/}}
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
