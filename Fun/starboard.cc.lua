@@ -10,12 +10,12 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 */}}
 
 {{/*CONFIGURATION VALUES START*/}}
-{{ $emoji := "⭐"}} {{/*emoji, unicode if stadard, or just the name if it's custom*/}}
+{{ $emoji := "⭐"}} {{/*emoji, unicode if stadard, or just the name if its custom*/}}
 {{ $stars := 1 }} {{/*amount of stars needed to be added*/}}
 {{ $chan := 785542681942032424 }} {{/*starboard channel*/}}
 {{ $color := 0x4B0082 }} {{/*color takes decimal or hex*/}}
 {{ $showImage := true }} {{/*weather or not to show an image in the embed*/}}
-{{/* ADVANCED CONFIGURATION VALUES*/}}
+{{/*ADVANCED CONFIGURATION VALUES*/}}
 {{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed*/}}
 {{/*CONFIGURATION VALUES END*/}}
 
@@ -42,7 +42,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		"Fields" (cslice (sdict "Name" (print "Reactions: " $count) "Value" (print "\n**[Message Link](" $msgLink ")**") "Inline" true))
 	}}
 
-{{/* transfering values if it's an embed */}}
+{{/* transfering values if its an embed */}}
 	{{ $image := "" }}
 	{{ if not $showImage }}
 		{{ $image = "Image" }}
@@ -89,14 +89,11 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 {{/*if it already exsists*/}}
 {{ else if ($db := dbGet 0 .ReactionMessage.ID) }}
 {{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
-	{{ $embed.Set "Fields" (cslice
-		(sdict "Name" (print "Reactions: " $count) "Value" (print "\n**[Message Link](" $msgLink ")**") "Inline" false)
-    ) }}
 	{{ if $count }}
+		{{ (index $embed.Fields 0).Set "Name" (print "Reactions: " $count) }}
 		{{ editMessage $chan $db.Value (cembed $embed) }}
-	{{ else }}
+	{{ else if and $removal (lt $count $stars) }}
 		{{ deleteMessage $chan $db.Value 0 }}
 		{{ dbDel 0 $db.Key }}
 	{{ end }}
 {{ end }}
-                                                
