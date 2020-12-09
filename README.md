@@ -5,9 +5,8 @@ paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs 
 
 ## To Do
 - [ ] Mod Creafter's CC command with more customizability (or just make my own)
-- [ ] Finish starboard
-- [ ] Finish poll re-make, more features (made base poll creation)
-- [ ] Give tic-tac-toev2 customizable in discord, not CP
+- [x] Finish starboard
+- [x] Finish poll re-make, more features (made base poll creation)
 - [ ] a secret thing
 - [ ] Fix maze command since the website is annoying (no fucking clue)
 
@@ -22,4 +21,4 @@ From my expirence I also know a trick or two on helping boost activity and how t
 This offer expires in the year 42069
 
 ### My Info
-[Crenshaw's server](https://discord.gg/y3BH7rr74w)
+[Crenshaw's server](https://discord.gg/EAvNyp4usR) <- first 10 people only
