@@ -82,13 +82,19 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 
 {{/* Special handling for video/article embeds »» coming soon! */}}
 
-{{/*send n save the message!*/}}
+{{/* send n save the message!*/}}
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
-{{/*if it already exsists*/}}
+{{/* if it already exsists*/}}
 {{ else if ($db := dbGet 0 .ReactionMessage.ID) }}
-{{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
+	{{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
+	{{ $f := cslice }}
+	{{ range $embed.Fields }}
+		{{ $f = $f.Append (structToSdict .) }}
+	{{ end }}
+	{{ $embed.Set "Fields" $f }}
+
 	{{ if $count }}
 		{{ (index $embed.Fields 0).Set "Name" (print "Reactions: " $count) }}
 		{{ editMessage $chan $db.Value (cembed $embed) }}
