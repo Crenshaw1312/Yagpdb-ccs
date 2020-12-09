@@ -1,5 +1,6 @@
 # Yagpdb+Pagstdb-ccs
-ERMAGERD? I HAVE THREE STARS?!
+ERMAGERD? I HAVE FIVE STARS!?
+tytytytytytytytytytytytytytytyty
 
 paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs pag under languages 
 
