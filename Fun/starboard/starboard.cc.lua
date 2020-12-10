@@ -9,17 +9,17 @@ Note* unsure if this works completely, have found no errors yet though
 Note* Keeps track of reaction count, supports images and embeds, also discord image links
 */}}
 
-{{/*CONFIGURATION VALUES START*/}}
-{{ $emoji := "⭐"}} {{/*emoji, unicode if stadard, or just the name if its custom*/}}
-{{ $stars := 1 }} {{/*amount of stars needed to be added*/}}
-{{ $chan := 785542681942032424 }} {{/*starboard channel*/}}
-{{ $color := 0x4B0082 }} {{/*color takes decimal or hex*/}}
-{{ $showImage := true }} {{/*weather or not to show an image in the embed*/}}
-{{/*ADVANCED CONFIGURATION VALUES*/}}
-{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed*/}}
-{{/*CONFIGURATION VALUES END*/}}
+{{/* CONFIGURATION VALUES START*/}}
+{{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if it's custom*/}}
+{{ $stars := 1 }} {{/* amount of stars needed to be added*/}}
+{{ $chan := 785542681942032424 }} {{/* starboard channel*/}}
+{{ $color := 0x4B0082 }} {{/* color takes decimal or hex*/}}
+{{ $removal := true }} {{/* if reactions go below $stars, delete starboard*/}}
+{{/* ADVANCED CONFIGURATION VALUES*/}}
+{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed, ln 20*/}}
+{{/* CONFIGURATION VALUES END*/}}
 
-{{/*The count of the stars*/}}
+{{/* The count of the stars*/}}
 {{ $count := 0 }}
 {{ range .ReactionMessage.Reactions }}
 	{{ if and (eq .Emoji.Name $emoji) }}
@@ -30,7 +30,8 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 {{ $msgLink := printf "https://discordapp.com/channels/%d/%d/%d" .Guild.ID .Channel.ID .ReactionMessage.ID }}
 {{ $filegex := print `https?://(?:\w+\.)?[\w-]+\.[\w]{2,3}(?:\/[\w-_.]+)+\.(` $validFiles `)` }}
 
-{{ if and .ReactionAdded (eq .Reaction.Emoji.Name $emoji) (ne (toInt .Channel.ID) $chan) (ge $count $stars) (not (dbGet 0 .ReactionMessage.ID).Value) }}
+
+{{ if and .ReactionAdded (eq .Reaction.Emoji.Name $emoji) (ge $count $stars) (ne (toInt .Channel.ID) $chan) (not (dbGet 0 .ReactionMessage.ID).Value) }}
 
 {{/* making the Embed*/}}
 	{{ $embed := sdict
@@ -42,15 +43,11 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		"Fields" (cslice (sdict "Name" (print "Reactions: " $count) "Value" (print "\n**[Message Link](" $msgLink ")**") "Inline" true))
 	}}
 
-{{/* transfering values if its an embed */}}
-	{{ $image := "" }}
-	{{ if not $showImage }}
-		{{ $image = "Image" }}
-	{{ end }}
+{{/* transfering values if it's an embed*/}}
 	{{ with .ReactionMessage.Embeds }}
-		{{ range $key, $value := (structToSdict (index . 0)) }}
-			{{ if and $value (not (eq $key "Fields" "Author" "Footer" "Thumbnail" "Color" "Timestamp" $image)) }} {{/*things here will not be transfered*/}}
-				{{ $embed.Set $key $value }}
+		{{ range $k, $v := (structToSdict (index . 0)) }}
+			{{ if and $v (not (eq $k "Fields" "Author" "Footer" "Color" "Timestamp" "Thumbnail")) }} {{/*things here will not be transfered*/}}
+				{{ $embed.Set $k $v }}
 			{{ end }}
 		{{ end }}
 	{{ end }}
@@ -67,7 +64,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 
 	{{ range $i,$v := $links }}
 		{{ $name := reFind `/[^/]+$` $v }} {{ $name = slice $name 1 }}
-		{{ if and $showImage (reFind `(?:png|jpg|jpeg|gif|webp|tif)$` $v) }}
+		{{ if reFind `(?:png|jpg|jpeg|gif|webp|tif)$` $v }}
 			{{ $embed.Set "Image" (sdict "url" $v) }}
 		{{ end }}
 		{{ $val := print (add $i 1) " **»** [" $name "](" $v ")" }}
@@ -80,13 +77,19 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		{{ end }}
 	{{ end }}
 
-{{/* Special handling for video/article embeds »» coming soon! */}}
+{{/* Special handling for video/article embeds*/}}
+	{{ if .ReactionMessage.Embeds }}
+		{{ with (structToSdict (index .ReactionMessage.Embeds 0)) }}
+{{/* Twitter Plugin Start*/}}
+{{/* Twitter Plugin End*/}}
+		{{ end }}
+	{{ end }}
 
-{{/* send n save the message!*/}}
+{{/*send n' save the message!*/}}
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
-{{/* if it already exsists*/}}
+{{/*if it already exsists*/}}
 {{ else if ($db := dbGet 0 .ReactionMessage.ID) }}
 	{{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
 	{{ $f := cslice }}
