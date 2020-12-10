@@ -5,8 +5,9 @@ How-to: scroll down in the starboard CC til you find this (towards bottom):
              {{/* Twitter Plugin Start*/}}
              {{/* Twitter Plugin End*/}}
 place the code below between the comments
+look at the README.md in this folder for more
 */}}
-{{ if ($p := reFind `https?://twitter\.com/.+/status/\d+(?:\s)?` (toString $.ReactionMessage.Content)) }}
+			{{ if ($p := reFind `https?://twitter\.com/.+/status/\d+(?:\s)?` (toString $.ReactionMessage.Content)) }}
 				{{ if (eq .Footer.IconURL "https://abs.twimg.com/icons/apple-touch-icon-192x192.png") }}
 					{{ $likes := "N/A" }} {{ $reposts := "N/A" }} {{ $description := .Description }}
 					{{ if ge (len .Fields) 1 }} {{ $likes = (index .Fields (sub (len .Fields) 1)).Value }} {{ end }}
