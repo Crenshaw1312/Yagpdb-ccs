@@ -9,7 +9,6 @@ paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs 
 - [x] Finish starboard
 - [x] Finish poll re-make, more features (made base poll creation)
 - [ ] a secret thing
-- [ ] Fix maze command since the website is annoying (no fucking clue)
 
 ## Uhh Welcome?
 So here you can find some custom commands to add to your guild/sever to do stuff.
