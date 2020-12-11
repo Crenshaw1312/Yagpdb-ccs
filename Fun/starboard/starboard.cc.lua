@@ -37,20 +37,11 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 	{{ $embed := sdict
 		"Author" (sdict "name" .ReactionMessage.Author.Username "icon_url" (.ReactionMessage.Author.AvatarURL "256"))
 		"Description" (reReplace $filegex .ReactionMessage.Content "")
-		"Color" $color
+      	"Color" $color
         "Timestamp" .ReactionMessage.Timestamp
 		"Footer" (sdict "text" "Posted on")
 		"Fields" (cslice (sdict "Name" (print "Reactions: " $count) "Value" (print "\n**[Message Link](" $msgLink ")**") "Inline" true))
 	}}
-
-{{/* transfering values if it's an embed*/}}
-	{{ with .ReactionMessage.Embeds }}
-		{{ range $k, $v := (structToSdict (index . 0)) }}
-			{{ if and $v (not (eq $k "Fields" "Author" "Footer" "Color" "Timestamp" "Thumbnail")) }} {{/*things here will not be transfered*/}}
-				{{ $embed.Set $k $v }}
-			{{ end }}
-		{{ end }}
-	{{ end }}
 
 {{/* find all image/file via link*/}}
 	{{ $attachLinks := cslice }}
@@ -77,11 +68,28 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		{{ end }}
 	{{ end }}
 
-{{/* Special handling for video/article embeds*/}}
+{{/* Transfering embed values and plugins*/}}
 	{{ if .ReactionMessage.Embeds }}
 		{{ with (structToSdict (index .ReactionMessage.Embeds 0)) }}
+			{{ range $k, $v := . }}
+				{{ if and $v (not (eq $k "Fields" "Author" "Footer" "Color" "Timestamp")) }} {{/*not transfered*/}}
+					{{ $embed.Set $k $v }}
+				{{ end }}
+			{{ end }}
+			{{ if eq .Type "image" }}
+				{{ $embed = sdict
+					"Author" $embed.Author
+                  			"Image" (sdict "url" .Thumbnail)
+					"Footer" $embed.Footer
+                  			"Color" $color
+					"Timestamp" $embed.Timestamp
+					"Fields" $embed.Fields
+				}}
+			{{ end }}
 {{/* Twitter Plugin Start*/}}
 {{/* Twitter Plugin End*/}}
+{{/* Github Plugin Start*/}}
+{{/* Github Plugin End */}}
 		{{ end }}
 	{{ end }}
 
