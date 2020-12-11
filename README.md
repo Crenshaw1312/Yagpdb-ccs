@@ -21,4 +21,4 @@ From my expirence I also know a trick or two on helping boost activity and how t
 This offer expires in the year 42069
 
 ### My Info
-[Crenshaw's server](https://discord.gg/EAvNyp4usR) <- first 10 people only
+[Crenshaw's server](https://discord.gg/EAvNyp4usR) <- 9 slots left
