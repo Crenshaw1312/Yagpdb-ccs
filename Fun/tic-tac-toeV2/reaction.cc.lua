@@ -7,6 +7,7 @@ using `ttt play @user` ing the other command, you react to play the game!
 
 Thanks to Devonte#0745 for helping me fix the rePlay 
 */}}
+{{/* give some credit to Devonte */}}
 {{ define "findWin" }}
 	{{ $wins := cslice "1️⃣-2️⃣-3️⃣" "4️⃣-5️⃣-6️⃣" "7️⃣-8️⃣-9️⃣" "1️⃣-4️⃣-7️⃣" "2️⃣-5️⃣-8️⃣" "7️⃣-5️⃣-3️⃣" "3️⃣-6️⃣-9️⃣" "1️⃣-5️⃣-9️⃣" }}
 	{{ $.Set "Result" false }}
@@ -23,6 +24,7 @@ Thanks to Devonte#0745 for helping me fix the rePlay
 {{/* .Embed, .Data, .ReactionMessage(Message tho)*/}}
 	{{ sleep 3 }}
 	{{ .Embed.Set "Description" "```\n1️⃣|2️⃣|3️⃣\n---------\n4️⃣|5️⃣|6️⃣\n---------\n7️⃣|8️⃣|9️⃣\n```" }}
+	{{ .Embed.Set "Title" "Re-Play!" }}
 	{{ editMessage nil .Message.ID (cembed .Embed) }}
 	{{ range (seq 1 10) }}
 		{{ if le . (len $.Data.Player2.Plays) }}
@@ -85,7 +87,7 @@ Thanks to Devonte#0745 for helping me fix the rePlay
 		{{ $findWin := (sdict "Player" $player)}}
 		{{ template "findWin" $findWin }}
 
-{{/* Dealing with win/Tie */}}
+{{/* Try to find a win/Tie */}}
 		{{ if $findWin.Result }}
 			{{ $embed.Del "Description" }} {{ $embed.Del "Title" }} {{ $embed.Set "Footer" (sdict "text" (print .User.Username " Won!") "icon_url" (.User.AvatarURL "256")) }}
 			{{ deleteAllMessageReactions nil .ReactionMessage.ID }}
