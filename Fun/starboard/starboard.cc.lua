@@ -10,7 +10,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
-{{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if it's custom*/}}
+{{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if its custom*/}}
 {{ $stars := 1 }} {{/* amount of stars needed to be added*/}}
 {{ $chan := 785542681942032424 }} {{/* starboard channel*/}}
 {{ $color := 0x4B0082 }} {{/* color takes decimal or hex*/}}
@@ -93,7 +93,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		{{ end }}
 	{{ end }}
 
-{{/*send n' save the message!*/}}
+{{/*send n save the message!*/}}
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
