@@ -3,9 +3,8 @@ Made by: Crenshaw#1312
 Credit: Devonte#0745, helping with minimizing ranges
 
 Trigger Type: Reaction
-Trigger: Added Only
+Trigger: Added + Removed
 
-Note* unsure if this works completely, have found no errors yet though
 Note* Keeps track of reaction count, supports images and embeds, also discord image links
 */}}
 
