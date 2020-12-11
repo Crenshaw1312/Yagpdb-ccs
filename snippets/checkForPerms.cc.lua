@@ -1,13 +1,14 @@
-{{/*Usage, put the number of permission you want to check for the user under "perm"
-1 | CREATE_INSTANT_INVITE
-2 | KICK_MEMBERS
-3 | BAN_MEMBERS
-4 | ADMINISTRATOR
-5 | MANAGE_CHANNELS
-6 | MANAGE_GUILD
-7 | ADD_REACTIONS
-8 | VIEW_AUDIT_LOG
-9 | PRIORITY_SPEAKER
+{{/*
+Usage, put the number of permission you want to check for the user under "perm"
+01 | CREATE_INSTANT_INVITE
+02 | KICK_MEMBERS
+03 | BAN_MEMBERS
+04 | ADMINISTRATOR
+05 | MANAGE_CHANNELS
+06 | MANAGE_GUILD
+07 | ADD_REACTIONS
+08 | VIEW_AUDIT_LOG
+09 | PRIORITY_SPEAKER
 10 | STREAM
 11 | VIEW_CHANNEL
 12 | SEND_MESSAGES
@@ -32,6 +33,14 @@
 31 | MANAGE_EMOJIS
 */}}
 
+{{/* One-liner from WickedWizard#3588, 
+    note: No spaces or underscores
+*/}}
+{{if in (split (index (split (exec "viewperms") "\n") 2) ", ") "ManageServer"}}
+
+{{/* */}}
+     
+{{/* define by LemmeCry#0001 I think*/}}
 {{define "checkUserGlobalPerm"}}
      {{.Set "ret" 0}}
      {{range .groles}}
