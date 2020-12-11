@@ -81,36 +81,6 @@ Changes:
 			Sorry, that tag does not exist.
 		{{end}}
  
-	{{else if and (reFind `(info(romation)?|about)` $cmd) (len $args)}}
-		{{$tagName := joinStr " " $args}}
-		{{$data:=sdict "Name" $tagName}}
-		{{template "getTag" $data}}
-		{{with $data.Tag}}
-			{{$aliases := split $data.Aliases "/"}}
-			{{$list := ""}}
-			{{if ge (len $aliases) 2}}
-				{{- range $k, $:=slice $aliases 1 -}}
-					{{if $k}}
-						{{$list =joinStr "" $list ", `" . "`"}}
-					{{else if .}}
-						{{$list =printf "`%s`" .}}
-					{{end}}
-				{{end}}
-			{{end}}
-			{{sendMessage nil (cembed
-				"title" "❯ Tag Info"
-				"color" 0x4b0082
-				"fields" (cslice
-					(sdict "name" "❯ Name" "value" (index $aliases 0))
-					(sdict "name" "❯ Aliases" "value" (or $list "n/a"))
-					(sdict "name" "❯ Created At" "value" (.CreatedAt.Format "Jan 02, 2006 3:04 PM"))
-				)
-				"footer" (sdict "text" (print "Requested by " $.User.Username) "icon_url" ($.User.AvatarURL "256"))
-			) }}
-		{{else}}
-			That tag does not exist. Try again?
-		{{end}}
- 
 	{{else if and $isCreator (reFind `(edit|alter)` $cmd ) (ge (len $args) 2)}}
 		{{$tagName:=index $args 0}}
 		{{$tagContent:=slice $args 1|joinStr " "}}
@@ -198,10 +168,10 @@ Changes:
 			{{$display:=""}}
 			{{$total:=len $tags}}
 			{{- range $k, $:=$tags -}}
-				{{$tagName:=title (index (split (slice .Key 4 (sub (len .Key) 1)) "|") 0)}}
+				{{$tagText := (split (slice .Key 4 (sub (len .Key) 1)) "|") }}
 				{{$tagIndex:=add $skip $k 1}}
 				{{$tagDate:=.CreatedAt.Format "Jan 02 3:04 PM"}}
-				{{$tagLine:=print "#" $tagIndex "-" $tagName " " (joinStr ", " (split (slice .Key 4 (sub (len .Key) 1)) "|")) " [" $tagDate "]\n\n"}}
+				{{$tagLine:=print "#" $tagIndex "-" (joinStr ", " $tagText) " [" $tagDate "]\n\n"}}
 				{{if eq $k (sub $total 1)}}
 					{{$display =print $display $tagLine "```\n For more results: `-tag list <page num>`"}}
 				{{else if $k}}
@@ -246,10 +216,9 @@ Changes:
 				"`tag addalias <name> <...aliases>`: Adds the given aliases to the tag provided."
 				"`tag delalias <name> <alias>`: Removes the given alias from the tag provided."
 				"`tag edit <name> <new-content>`: Edits the tag's content to the content provided."
-				"`tag info <tag>`: Info on a given tag."
 				"`tag list`: Lists all tags."
 				"`tag syntax`: List of available syntax."
-				"`<tagname>`: Fetch said tag."
+				"`<tagname>`: Fetches tag"
 			)
 			"footer" (sdict "text" (print "Requested by " $.User.Username) "icon_url" ($.User.AvatarURL "256"))
 			"color" 0x4B0082
