@@ -6,6 +6,7 @@ Trigger Type: regex
 Trigger: \A-poll\s?(c(reate)?|start|begin|make)
 		
 Usage: poll create <poll name> <option 1> <option 2> "[option 2 2 2]" [option 3]
+	Flags: -single and -multipule
 
 Requirement: disable default poll command in Command overrides
 Requirements: pollDelete.cc.lua
