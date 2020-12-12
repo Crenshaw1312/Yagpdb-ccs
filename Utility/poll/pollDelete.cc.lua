@@ -3,7 +3,9 @@ Made by: Crenshaw1312
 Credit: Piter#2105
 		
 Trigger Type: Regex
-Trigger: \A-poll\s?(end|stop|results)
+Trigger: \A-poll\s?(end|stop|results|d(elete)?)
+
+Usage: poll stop <channel> <poll name/message ID>
  
 Requirements: pollCreate.cc.lua
               pollReaction.cc.lua
