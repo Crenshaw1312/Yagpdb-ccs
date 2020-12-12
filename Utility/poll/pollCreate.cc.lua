@@ -4,12 +4,15 @@ Thanks: DZ#6669 Reason: Made regex, ("[^"]*")|([^"\s]*)
 
 Trigger Type: regex
 Trigger: \A-poll\s?(c(reate)?|start|begin|make)
+		
+Usage: poll create <poll name> <option 1> <option 2> "[option 2 2 2]" [option 3]
 
 Requirement: disable default poll command in Command overrides
 Requirements: pollDelete.cc.lua
 	      pollReaction.cc.lua
   (optional)  pollList.cc.lus
 
+Note: You can use "" on the title/options if they are more then one word
 Note: You cant use both -single and -multiple flags at once
 Note: using more then 6 or so unicode emojis in your title will preak it.
 Note: Single mode does not work do to a bug on PAGSTDB and YAGPDB
