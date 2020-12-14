@@ -89,6 +89,8 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 {{/* Twitter Plugin End*/}}
 {{/* Github Plugin Start*/}}
 {{/* Github Plugin End */}}
+{{/* Youtube Plugin Start*/}}
+{{/* Youtube Plugin End*/}
 		{{ end }}
 	{{ end }}
 
