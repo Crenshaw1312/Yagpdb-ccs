@@ -78,6 +78,7 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 			{{ if eq .Type "image" }}
 				{{ $embed = sdict
 					"Author" $embed.Author
+					"Description" $embed.Description
                   			"Image" (sdict "url" .Thumbnail)
 					"Footer" $embed.Footer
                   			"Color" $color
