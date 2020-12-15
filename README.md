@@ -1,5 +1,5 @@
 # Yagpdb+Pagstdb-ccs
-ERMAGERD? I HAVE FIVE STARS!?
+ERMAGERD? I HAVE SIX STARS!?
 tytytytytytytytytytytytytytytyty
 
 paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs pag under languages 
@@ -9,6 +9,7 @@ paggy commands are in go, yaggy is lua, so you can see the percentage of yag vs 
 - [x] Finish starboard
 - [x] Finish poll re-make, more features (made base poll creation)
 - [ ] a secret thing
+- [ ] suggestion system, back burner try [Devonte's suggestion system](https://github.com/NaruDevnote/yagpdb-ccs/tree/master/template-suggestions)
 
 ## Uhh Welcome?
 So here you can find some custom commands to add to your guild/sever to do stuff.
@@ -21,4 +22,4 @@ From my expirence I also know a trick or two on helping boost activity and how t
 This offer expires in the year 42069
 
 ### My Info
-[Crenshaw's server](https://discord.gg/EAvNyp4usR) <- 9 slots left
+[Crenshaw's server](https://discord.gg/EAvNyp4usR) <- 7 slots left
