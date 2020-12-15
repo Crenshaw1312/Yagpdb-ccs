@@ -86,6 +86,8 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 					"Fields" $embed.Fields
 				}}
 			{{ end }}
+{{/* Giphy/Tenor Plugin Start*/}}
+{{/* Giphy/Tenor Plugin End*/}}
 {{/* Twitter Plugin Start*/}}
 {{/* Twitter Plugin End*/}}
 {{/* Github Plugin Start*/}}
