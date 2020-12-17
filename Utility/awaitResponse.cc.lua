@@ -19,21 +19,33 @@
   
 */}}
 
-{{/* configuration area */}}
+{{/* CONFIGURATION VALUES START*/}}
 {{$trigger:=`-start`}} {{/* the trigger is set to -trigger, basic regex knowledge is required to edit this */}}
-{{$timer:=15}} {{/* 60s timer, if timer ends with no response, the command is automatically disabled */}}
-
+{{$timer:=30}} {{/* 60s timer, if timer ends with no response, the command is automatically disabled */}}
+{{/* QUESTIONS
+	regex: regex for the response you want for that question
+    title: subject/title of that embed
+    description: description
+*/}}
+{{$q:=cslice
+  	(sdict "regex" `\A\d+(\s+|\z)` "title" "Number" "description" "type a number")
+  	(sdict "regex" `\A.+(\s+|\z)` "title" "Anything" "description" "type anything")
+  	(sdict "regex" `\A(happy|sad)(\s+|\z)` "title" "Anything" "description" "are you happy or sad")
+}}
 {{/* DO NOT EDIT BELOW (unless you want to learn how it works or know what you're doing c: ) */}}
+  
 {{$databaseValue:=toInt (dbGet .User.ID "waitResponse").Value}}
 {{$dontChangeStage:=0}}
 {{$changeStage:=0}}
+{{ $responses := 0 }}
 {{$colour:=0x4B0082}}
 {{$position:=0}}
+{{ $q = $q.Append (sdict "regex" `.*` "title" "Responses" "description" "_ _") }}
 
 {{define "err"}}
-{{ $id := sendMessageRetID nil "Incorrect value please try again." }}
-{{ deleteMessage nil $id 3 }}
-{{ deleteTrigger 0 }}
+	{{ $id := sendMessageRetID nil "Incorrect value please try again." }}
+	{{ deleteMessage nil $id 3 }}
+	{{ deleteTrigger 0 }}
 {{end}}
 
 {{/* sets colour to role colour */}}
@@ -44,7 +56,7 @@
 {{end}}
 
 {{/* sets default value for $embed */}}
-{{$embed:=sdict "author" (sdict "icon_url" (.User.AvatarURL "256") "name" (print "User: " .User.String)) "footer" (sdict "text" "Type cancel to cancel the tutorial.") "color" $colour}}
+{{$embed:=sdict "author" (sdict "icon_url" (.User.AvatarURL "256") "name" (print "User: " .User.String)) "footer" (sdict "text" "Type cancel to cancel the questionaire.") "color" $colour}}
 
 {{/* checks if it was executed by scheduleUniqueCC */}}
 {{if .ExecData}}
@@ -53,82 +65,53 @@
 	{{sendMessage nil (cembed $embed)}}
 {{else}}
 
-	{{/* if no database */}}
-	{{if not $databaseValue}}
-		{{if reFind (print `\A(?i)` $trigger `(\s+|\z)`) .Message.Content}}
-			{{$embed.Set "title" "Your Elevation"}}
-			{{$embed.Set "description" "Enter you altitude"}}
-			{{dbSetExpire .User.ID "responses" (cslice) $timer }}
-			{{$changeStage =1}}
-			{{scheduleUniqueCC .CCID nil $timer "cancelled" 1}}
-		{{end}}
-	{{/* if $databaseValue has a value */}}
-	{{else}}
-{{/* Getting responses*/}}
-		{{$responses:=(cslice).AppendSlice (dbGet .User.ID "responses").Value}}
-
-		{{if eq $databaseValue 1}}
-			{{with toInt .Message.Content}}
-				{{if gt . 0}}
-					{{$embed.Set "title" "Airport Elevation"}}
-					{{$embed.Set "description" "**Elevation** of the airport (from sea level)"}}
-					{{ dbSetExpire $.User.ID "responses" ($responses.Append $.Message.Content) $timer }}
-					{{$changeStage =1}}
-				{{else}}
-					{{template "err"}} {{$changeStage =0}}
-				{{end}}
-			{{else}}
-				{{template "err"}} {{$changeStage =0}}
-			{{end}}
-			{{scheduleUniqueCC .CCID nil $timer "cancelled" 1}}
-
-		{{else if eq $databaseValue 2}}
-			{{with toInt .Message.Content}}
-				{{if gt . 0 }}
-					{{$embed.Set "title" "Tail Wind"}}
-					{{$embed.Set "description" "Enter **true** or **false** if you have tail wind"}}
-					{{ dbSetExpire $.User.ID "responses" ($responses.Append $.Message.Content) $timer }}
-					{{$changeStage =1}}
-				{{else}}
-					{{template "err"}} {{$changeStage =0}}
-				{{end}}
-			{{else}}
-				{{template "err"}} {{$changeStage =0}}
-			{{end}}
-			{{scheduleUniqueCC .CCID nil $timer "cancelled" 1}}
-
-		{{else if eq $databaseValue 3}}
-			{{if eq (lower (toString .Message.Content)) "true" "false"}}
-				{{$embed.Set "title" "Done"}}
-				{{$embed.Set "description" "Enter **finished** or **done**"}}
-				{{ dbSetExpire $.User.ID "responses" ($responses.Append $.Message.Content) $timer }}
+	{{ range $num, $qval := $q }}
+{{/* Starting*/}}
+		{{ if reFind (print `\A(?i)` $trigger `(\s+|\z)`) $.Message.Content }}
+			{{ if and (not $databaseValue) (not $num) }}
+				{{ $embed.Set "title" $qval.title }}
+				{{ $embed.Set "description" $qval.description }}
+				{{ dbSetExpire $.User.ID "responses" (cslice) $timer }}
 				{{$changeStage =1}}
-			{{else}}
-				{{template "err"}} {{$changeStage =0}}
-			{{end}}
-			{{scheduleUniqueCC .CCID nil $timer "cancelled" 1}}
+			{{ end }}
+		{{ else if and $num $databaseValue }}
+			{{ $responses = (cslice).AppendSlice (dbGet $.User.ID "responses").Value }}
+		{{ end }}
 
-		{{else if eq $databaseValue 4}}
-			{{if eq (lower .Message.Content) "finish" "finished" "done" "enter" }}
-				{{$embed.Set "title" "Calculation Finished!"}}
-				{{$embed.Set "description" (json $responses) }}
-				{{dbDel .User.ID "waitResponse"}}
-			{{else}}
+{{/* Cancellation*/}}
+		{{ if and (eq (lower $.Message.Content) "cancel" "quit" "stop") $num }}
+			{{$embed.Set "title" "Cancelled"}}
+			{{$embed.Set "description" (print (or $.Member.Nick $.User.Username) "#" $.User.Discriminator " has decided to cancel the questionaire.")}}
+			{{dbDel $.User.ID "waitResponse"}}
+			{{$changeStage =0}}
+			{{cancelScheduledUniqueCC $.CCID "cancelled"}}
+
+		{{ else if and (eq $num $databaseValue) $num }}
+{{/* Normal question*/}}
+			{{ if reFind (index $q (sub $num 1)).regex $.Message.Content }}
+				{{$embed.Set "title" $qval.title}}
+				{{$embed.Set "description" $qval.description}}
+				{{ $responses = $responses.Append $.Message.Content }}
+				{{ dbSetExpire $.User.ID "responses" $responses $timer }}
+				{{$changeStage =1}}
+				{{scheduleUniqueCC $.CCID nil $timer "cancelled" 1}}
+
+{{/* ending questionaire*/}}
+				{{ if (eq (sub (len $q) 1) $databaseValue)}}
+					{{$changeStage =0}}
+					{{cancelScheduledUniqueCC $.CCID "cancelled"}}
+					{{dbDel $.User.ID "waitResponse"}}
+					{{dbDel $.User.ID "responses"}}
+					{{ $embed.Set "description" (joinStr "\n" "```\n" $responses.StringSlice "\n```") }}
+				{{ end }}
+{{/* Error*/}}
+			{{ else }}
 				{{template "err"}}
-			{{end}}
-			{{$changeStage =0}}
-			{{cancelScheduledUniqueCC .CCID "cancelled"}}
-		{{end}}
+				{{$changeStage =0}}
+  			{{ end }}
+		{{ end }}
 
-		{{/* checks if user inputted cancel */}}
-		{{if eq (lower .Message.Content) "cancel" "stop" "end" "quit"}}
-			{{$embed.Set "title" "Calculation was Cancelled"}}
-			{{$embed.Set "description" (print (or .Member.Nick .User.Username) "#" .User.Discriminator " has decided to cancel the tutorial.")}}
-			{{dbDel .User.ID "waitResponse"}}
-			{{$changeStage =0}}
-			{{cancelScheduledUniqueCC .CCID "cancelled"}}
-		{{end}}
-	{{end}}
+	{{ end }}
 {{end}}
 
 {{/* used to change stage to next stage, the reason we use dbSetExpire instead of dbIncr is because dbIncr would still have the same expiration date as the old dbSetExpire, we use dbSetExpire to replace that expiration date */}}
