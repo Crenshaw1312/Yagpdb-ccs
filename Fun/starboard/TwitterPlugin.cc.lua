@@ -1,7 +1,7 @@
 {{/*
 Made by: Crenshaw#1312
 
-How-to: scroll down in the starboard CC til you find this (towards bottom):
+How-to: scroll down in the starboard CC til you find this:
              {{/* Twitter Plugin Start*/}}
              {{/* Twitter Plugin End*/}}
 place the code below between the comments
@@ -18,19 +18,19 @@ look at the README.md in this folder for more
 					{{ end }}
 					{{ $embed = sdict
     					"Author" $embed.Author
-  						"Title" (print "Twitter | " .Author.Name )
-  						"URL" $p
- 						"Thumbnail" (sdict "URL" .Author.IconURL)
-  						"Description" $embed.Description
-						"Image" (or .Image .Thumbnail)
+  					"Title" (print "Twitter\n" .Author.Name )
+  					"URL" $p
+ 					"Thumbnail" (sdict "URL" .Footer.IconURL)
+  					"Description" $embed.Description
+					"Image" (or .Image .Thumbnail)
     					"Color" (or $color .Color)
     					"Footer" .Footer
     					"Timestamp" .Timestamp
     					"Fields" ($embed.Fields.Append (sdict
-							"Name" "Twitter"
-							"Value" (print "**Likes: " $likes "**\n**Reposts: " $reposts "**")
-							"Inline" true
-						)) 
+					  "Name" "Twitter"
+                            		  "Value" (print "**Likes: " $likes "**\n**Reposts: " $reposts "**\n**Avatar: [Link](" .Author.IconURL ")**")
+					  "Inline" true
+					 )) 
 					}}
 				{{ end }}
 			{{ end }}
