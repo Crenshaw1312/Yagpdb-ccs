@@ -9,13 +9,16 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
+
 {{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if its custom*/}}
 {{ $stars := 1 }} {{/* amount of stars needed to be added*/}}
 {{ $chan := 785542681942032424 }} {{/* starboard channel*/}}
-{{ $color := 0x4B0082 }} {{/* color takes decimal or hex*/}}
-{{ $removal := true }} {{/* if reactions go below $stars, delete starboard*/}}
+{{ $color := 0x4B0082 }} {{/* color takes decimal or hex, default is the best fucking color*/}}
+{{ $removal := true }} {{/* if reactions go below $stars (above), delete starboard*/}}
+			
 {{/* ADVANCED CONFIGURATION VALUES*/}}
-{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed, ln 20*/}}
+{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed, see ln 33 if you know shit*/}}
+			
 {{/* CONFIGURATION VALUES END*/}}
 
 {{/* The count of the stars*/}}
@@ -75,11 +78,11 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 					{{ $embed.Set $k $v }}
 				{{ end }}
 			{{ end }}
-			{{ if eq .Type "image" }}
+			{{ if eq (lower .Type) "image" "gifv" }}
 				{{ $embed = sdict
 					"Author" $embed.Author
+					"Image" .Thumbnail
 					"Description" $embed.Description
-                  			"Image" (sdict "url" .Thumbnail)
 					"Footer" $embed.Footer
                   			"Color" $color
 					"Timestamp" $embed.Timestamp
