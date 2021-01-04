@@ -8,8 +8,7 @@
     Trigger: .*
   
     Note: edit what you want to start the poll below
-    Note: Doing this for a Coding4Nitro thing, but the changes I made are kinda cool imo
-    Note: This cc is a styling mess, please ignore
+    Note: requires regex knowledge or help
   
     Changes:
     Simpler error response (and shortened)
@@ -20,10 +19,11 @@
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
+
 {{$trigger:=`-start`}} {{/* the trigger is set to -trigger, basic regex knowledge is required to edit this */}}
 {{$timer:=30}} {{/* 60s timer, if timer ends with no response, the command is automatically disabled */}}
 {{/* QUESTIONS
-	regex: regex for the response you want for that question
+    regex: regex for the response you want for that question (same sdict)
     title: subject/title of that embed
     description: description
 */}}
@@ -32,7 +32,8 @@
   	(sdict "regex" `\A.+(\s+|\z)` "title" "Anything" "description" "type anything")
   	(sdict "regex" `\A(happy|sad)(\s+|\z)` "title" "Anything" "description" "are you happy or sad")
 }}
-{{/* DO NOT EDIT BELOW (unless you want to learn how it works or know what you're doing c: ) */}}
+
+{{/* DO NOT EDIT BELOW (unless you want to learn how it works or know what youre doing c: ) */}}
   
 {{$databaseValue:=toInt (dbGet .User.ID "waitResponse").Value}}
 {{$dontChangeStage:=0}}
@@ -65,53 +66,53 @@
 	{{sendMessage nil (cembed $embed)}}
 {{else}}
 
-	{{ range $num, $qval := $q }}
+	{{range $num, $qval := $q}}
 {{/* Starting*/}}
-		{{ if reFind (print `\A(?i)` $trigger `(\s+|\z)`) $.Message.Content }}
-			{{ if and (not $databaseValue) (not $num) }}
-				{{ $embed.Set "title" $qval.title }}
-				{{ $embed.Set "description" $qval.description }}
-				{{ dbSetExpire $.User.ID "responses" (cslice) $timer }}
+		{{if reFind (print `\A(?i)` $trigger `(\s+|\z)`) $.Message.Content}}
+			{{if and (not $databaseValue) (not $num)}}
+				{{$embed.Set "title" $qval.title}}
+				{{$embed.Set "description" $qval.description}}
+				{{dbSetExpire $.User.ID "responses" (cslice) $timer}}
 				{{$changeStage =1}}
-			{{ end }}
-		{{ else if and $num $databaseValue }}
-			{{ $responses = (cslice).AppendSlice (dbGet $.User.ID "responses").Value }}
-		{{ end }}
+			{{end}}
+		{{else if and $num $databaseValue}}
+			{{$responses =(cslice).AppendSlice (dbGet $.User.ID "responses").Value}}
+		{{end}}
 
 {{/* Cancellation*/}}
-		{{ if and (eq (lower $.Message.Content) "cancel" "quit" "stop") $num }}
+		{{if and (eq (lower $.Message.Content) "cancel" "quit" "stop") $num}}
 			{{$embed.Set "title" "Cancelled"}}
 			{{$embed.Set "description" (print (or $.Member.Nick $.User.Username) "#" $.User.Discriminator " has decided to cancel the questionaire.")}}
 			{{dbDel $.User.ID "waitResponse"}}
 			{{$changeStage =0}}
 			{{cancelScheduledUniqueCC $.CCID "cancelled"}}
 
-		{{ else if and (eq $num $databaseValue) $num }}
+		{{else if and (eq $num $databaseValue) $num}}
 {{/* Normal question*/}}
-			{{ if reFind (index $q (sub $num 1)).regex $.Message.Content }}
+			{{if reFind (index $q (sub $num 1)).regex $.Message.Content}}
 				{{$embed.Set "title" $qval.title}}
 				{{$embed.Set "description" $qval.description}}
-				{{ $responses = $responses.Append $.Message.Content }}
-				{{ dbSetExpire $.User.ID "responses" $responses $timer }}
+				{{$responses = $responses.Append $.Message.Content}}
+				{{dbSetExpire $.User.ID "responses" $responses $timer}}
 				{{$changeStage =1}}
 				{{scheduleUniqueCC $.CCID nil $timer "cancelled" 1}}
 
 {{/* ending questionaire*/}}
-				{{ if (eq (sub (len $q) 1) $databaseValue)}}
+				{{if (eq (sub (len $q) 1) $databaseValue)}}
 					{{$changeStage =0}}
 					{{cancelScheduledUniqueCC $.CCID "cancelled"}}
 					{{dbDel $.User.ID "waitResponse"}}
 					{{dbDel $.User.ID "responses"}}
-					{{ $embed.Set "description" (joinStr "\n" "```\n" $responses.StringSlice "\n```") }}
-				{{ end }}
+					{{$embed.Set "description" (joinStr "\n" "```\n" $responses.StringSlice "\n```")}}
+				{{end}}
 {{/* Error*/}}
-			{{ else }}
+			{{else}}
 				{{template "err"}}
 				{{$changeStage =0}}
-  			{{ end }}
-		{{ end }}
+  			{{end}}
+		{{end}}
 
-	{{ end }}
+	{{end}}
 {{end}}
 
 {{/* used to change stage to next stage, the reason we use dbSetExpire instead of dbIncr is because dbIncr would still have the same expiration date as the old dbSetExpire, we use dbSetExpire to replace that expiration date */}}
@@ -121,7 +122,7 @@
 
 {{/* sends message if database has value, used to make it not spam chat */}}
 {{if or $databaseValue (dbGet .User.ID "waitResponse")}}
-	{{ if $embed.description }}
+	{{if $embed.description}}
 		{{sendMessage nil (cembed $embed)}}
-	{{ end }}	
+	{{end}}	
 {{end}}
