@@ -7,22 +7,25 @@ Trigger Type: Reaction
 Trigger: Added + Removed
 
 Note: Keeps track of reaction count, supports images and embeds, also discord image links, and whatever plugins you add
+Note: Tenor plugin wont always work as it should, my display wrong gif, works fine without plugin
 Note: Youre safe to allow emojis in starboard channel,
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
 
-{{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if its custom*/}}
+{{ $emoji := "⭐"}} {{/* emoji, unicode if stadard, or just the name if it's custom*/}}
 {{ $stars := 1 }} {{/* amount of stars needed to be added*/}}
 {{ $chan := 785542681942032424 }} {{/* starboard channel*/}}
-{{ $color := 0x4B0082 }} {{/* color takes decimal or hex, default is the best fucking color*/}}
-{{ $removal := true }} {{/* if reactions go below $stars (above), delete starboard*/}}
-			
+{{ $color := 0x4B0082 }} {{/* color takes decimal or hex*/}}
+{{ $removal := true }} {{/* if reactions go below $stars, delete starboard*/}}
+					
 {{/* ADVANCED CONFIGURATION VALUES*/}}
-{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed, see ln 33 if you know shit*/}}
-			
-{{/* CONFIGURATION VALUES END*/}}
+					
+{{ $validFiles := `png|jpe?g|gif|webp|mp4|mkv|mov|wav` }} {{/*allowed file types, regex allowed, ln 20*/}}
+					
+{{/* CONFIGURATION VALUES END DON NOT EDIT BELOW THIS LINE*/}}
 
+				
 {{/* The count of the stars*/}}
 {{ $count := 0 }}
 {{ range .ReactionMessage.Reactions }}
@@ -83,16 +86,16 @@ Note: Youre safe to allow emojis in starboard channel,
 			{{ if eq (lower .Type) "image" "gifv" }}
 				{{ $embed = sdict
 					"Author" $embed.Author
-					"Image" .Thumbnail
-					"Description" $embed.Description
+                  			"Image" .Thumbnail
+                  			"Description" $embed.Description
 					"Footer" $embed.Footer
                   			"Color" $color
 					"Timestamp" $embed.Timestamp
 					"Fields" $embed.Fields
 				}}
 			{{ end }}
-{{/* Giphy/Tenor Plugin Start*/}}
-{{/* Giphy/Tenor Plugin End*/}}
+{{/* Tenor start*/}}
+{{/* Tenor End*/}}
 {{/* Twitter Plugin Start*/}}
 {{/* Twitter Plugin End*/}}
 {{/* Github Plugin Start*/}}
@@ -106,7 +109,7 @@ Note: Youre safe to allow emojis in starboard channel,
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
-{{/* if it already exsists*/}}
+{{/*if it already exsists*/}}
 {{ else if ($db := dbGet 0 .ReactionMessage.ID) }}
 	{{ if (getMessage $chan (toInt $db.Value)) }}
 {{/* fixing field and CC struct so it's sDcit*/}}
