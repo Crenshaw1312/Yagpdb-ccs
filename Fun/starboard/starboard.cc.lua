@@ -1,11 +1,13 @@
 {{/*
 Made by: Crenshaw#1312
 Credit: Devonte#0745, helping with minimizing ranges
+Credit: everyone yellling at me to fix db on force delete starboard message :P <3
 
 Trigger Type: Reaction
 Trigger: Added + Removed
 
-Note* Keeps track of reaction count, supports images and embeds, also discord image links
+Note: Keeps track of reaction count, supports images and embeds, also discord image links, and whatever plugins you add
+Note: Youre safe to allow emojis in starboard channel,
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
@@ -100,24 +102,30 @@ Note* Keeps track of reaction count, supports images and embeds, also discord im
 		{{ end }}
 	{{ end }}
 
-{{/*send n save the message!*/}}
+{{/* send n save the message!*/}}
 	{{ $id := sendMessageRetID $chan (cembed $embed) }}
 	{{ dbSet 0 .ReactionMessage.ID (toString $id) }}
 
-{{/*if it already exsists*/}}
+{{/* if it already exsists*/}}
 {{ else if ($db := dbGet 0 .ReactionMessage.ID) }}
-	{{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
-	{{ $f := cslice }}
-	{{ range $embed.Fields }}
-		{{ $f = $f.Append (structToSdict .) }}
-	{{ end }}
-	{{ $embed.Set "Fields" $f }}
-
-	{{ if $count }}
-		{{ (index $embed.Fields 0).Set "Name" (print "Reactions: " $count) }}
-		{{ editMessage $chan $db.Value (cembed $embed) }}
-	{{ else if and $removal (lt $count $stars) }}
-		{{ deleteMessage $chan $db.Value 0 }}
+	{{ if (getMessage $chan (toInt $db.Value)) }}
+{{/* fixing field and CC struct so it's sDcit*/}}
+		{{ $embed := structToSdict (index (getMessage $chan $db.Value ).Embeds 0) }}
+		{{ $f := cslice }}
+		{{ range $embed.Fields }}
+			{{ $f = $f.Append (structToSdict .) }}
+		{{ end }}
+		{{ $embed.Set "Fields" $f }}
+{{/* Updating the Message*/}}
+		{{ if $count }}
+			{{ (index $embed.Fields 0).Set "Name" (print "Reactions: " $count) }}
+			{{ editMessage $chan $db.Value (cembed $embed) }}
+		{{ else if and $removal (lt $count $stars) }}
+			{{ deleteMessage $chan $db.Value 0 }}
+			{{ dbDel 0 $db.Key }}
+		{{ end }}
+{{/* If the message was delete by force, not emoji*/}}
+	{{ else }}
 		{{ dbDel 0 $db.Key }}
 	{{ end }}
 {{ end }}
