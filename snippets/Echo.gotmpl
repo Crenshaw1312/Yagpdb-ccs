@@ -1,0 +1,18 @@
+{{/* Echo
+Made by: Crenshaw
+
+Allows: Only ASGPDB (by shadow)
+
+Note: This sends a message to all channels, just a demo of .Guild.Channels
+*/}}
+
+{{range .Guild.Channels}}
+	{{sendMessage .ID (cembed
+		"Author" (sdict "iconurl" ($.User.AvatarURL "256") "name"  $.User.String)
+		"Title" $.StrippedMsg
+		"Description" "Echo Message"
+	)}}
+{{end}}
+
+{{deleteTrigger 0}}
+Echo complete!
