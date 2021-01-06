@@ -1,0 +1,31 @@
+{{/*Hunter
+Made by: Crenshaw #1312
+
+Trigger Type: Command prefix/mention
+Trigger: hunter
+
+Note: demo of while and exit as a hunter tries to hunt some animals
+
+Allows: ASGPDB ONLY!!!
+*/}}
+
+{{ $all := (shuffle (cslice "zebra" "heyna" "bird" "lion" "monke" "bear" "fox")) }}
+{{ $killed := (cslice) }}
+{{ $bullets := 25 }}
+
+{{ while (ne $bullets 0) }}
+	{{ $animal := index (shuffle $all) 0 }}
+
+	{{ if eq (len $all) 1 }}
+		{{ sendMessage nil (print "_ _\nBullets Left `" $bullets "`\nAnimals Killed `" (joinStr ", " $killed.StringSlice) "`\nAnimals Alive `" (joinStr ", " $all.StringSlice) "`") }}
+		{{ exit }}
+	{{ end }}
+
+	{{ if eq $animal (index $all 0) }}
+		{{ $killed = $killed.Append $animal }}
+		{{ $all = slice $all 1}}
+	{{ end }}
+
+	{{ $bullets = sub $bullets 1 }} {{/* the hunter uses a bullet every iteration*/}}
+{{ end }}
+{{ sendMessage nil "Hunter had a failed hunt" }}
