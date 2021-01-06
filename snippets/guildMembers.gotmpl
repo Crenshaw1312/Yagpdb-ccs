@@ -1,0 +1,18 @@
+{{/*
+Made by: Crenshaw#1312
+
+Allows: ASGPDB ONLY
+
+Trigger Type: Command preifx/mention
+Trigger: online
+
+*/}}
+{{ $online := cslice }}
+{{ range .Guild.Members }}
+	{{ $online = $online.Append .User.String }}
+{{ end }}
+{{ sendMessage nil (cembed
+	"Title" "Online People"
+	"Description" (print "```\n" (joinStr "\n" $online.StringSlice) "\n```")
+	"Color" 0x4B0082
+) }}
