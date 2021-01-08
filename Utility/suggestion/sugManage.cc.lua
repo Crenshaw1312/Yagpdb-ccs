@@ -17,12 +17,13 @@ Usage:
       ^Approve of a suggestion
       
   -sug imp/implement <sugNum> [reason]
-      ^Implement a suggestion, you've done what this suggestion asked
+      ^Implement a suggestion, youve done what this suggestion asked
       
   -sug q/quote <sugNum>
       ^Anyone can use this, quote a suggestion
 
 Note: `-sug implement` and `-sug approve` both make it so the suggestion WILL NOT be deleted after given seconds in sugCreate.cc.lua
+Note: MAKE SURE TO PUT THE CORRECT SUGGESTION CHANEL IN CONFIG VALUES
 */}}
 
 {{/* CONFIGURATION VALUES START*/}}
