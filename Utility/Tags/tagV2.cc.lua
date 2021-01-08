@@ -22,7 +22,7 @@ Changes:
 
 {{/*CUSTOMIZATION*/}}
 {{/*The people with the following roleIDs will be able to manage tags*/}}
-{{ $tagCreator := cslice 770291866208829470 }}
+{{ $tagCreator := cslice 794851478149660673 }}
 
 {{/*CUSTOMIZATION ENDS*/}}
  
@@ -245,13 +245,14 @@ Changes:
 				{{$result:=($syntax.Get (lower (index $split 0))).Get (lower (index $split 1))}}
 				{{if $result}}{{$tagValue =reReplace . $tagValue $result}}{{end}}
 			{{- end -}}
-			{{sendMessage nil (cembed
+			{{$a := sendMessageRetID nil (cembed
 				"title" (title (print "**" $data.Aliases "**"))
 				"description" $tagValue
 				"footer" (sdict "text" (print "Requested by " $.User.Username) "icon_url" ($.User.AvatarURL "256"))
 				"color" 0x4B0082
 				"image" (sdict "url" $attachment)
 			) }}
+			{{addMessageReactions nil $a "📱"}}
 		{{end}}
 	{{end}}
 {{end}}
