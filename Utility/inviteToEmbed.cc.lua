@@ -1,5 +1,5 @@
 {{/*
-Made by: Crensahw#1312
+Made by: Crenshaw#1312
 Credit: LemmeCry#0001
 
 Trigger Type: Regex
