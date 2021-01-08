@@ -11,7 +11,7 @@ Note: You can change your upvote/downvote in line 46 (on Github)
 
 {{/* CONFIGURATION VAlUES START*/}}
 {{ $color := 0x4B0082 }} {{/* 0x(Hex code)*/}}
-{{ $autoDel := 300 }} {{/* delete suggestions after X seconds, 0 to dissable*/}}
+{{ $autoDel := 1209600 }} {{/* delete suggestions after X seconds, 0 to disable (set at two weeks currently)*/}}
 {{/* CONFIGURATION VALUES END*/}}
 
 {{ if .ExecData.Key }}
