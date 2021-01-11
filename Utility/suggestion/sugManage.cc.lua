@@ -3,6 +3,14 @@ Made by: Crenshaw#1312
 
 Trigger Type: Regex
 Trigger: \A-s(ug|uggestion(s)?)?\s?(del(ete)?|deny|com(ment)?|ap(prove)?|imp(lement)?|q(oute)?)
+		
+Note: `-sug implement` and `-sug approve` both make it so the suggestion WILL NOT be deleted after given seconds in sugCreate.cc.lua
+Note: This system is much cleaner then most others due to the simplicity and databse used for it
+Note: MAKE SURE TO PUT THE CORRECT DATA/INFORMATION IN CONFIG VALUES!!!!!!!!
+~~~~
+Note: has image and MULTIPLE file(s)/image(s) support, dynamically showed in a field
+Note: Supports multipule comments and editing them (not deletion yet though)
+Note: Has quoting mechanisim
 
 Usage:
   Base: -suggestion/-sug/-s
@@ -14,29 +22,45 @@ Usage:
       ^Comment on a suggestion (supports multipule comments and editing them)
       
   -sug ap/approve <sugNum> [reason]
-      ^Approve of a suggestion
+      ^Approve of a suggestion, also makes the suggestion stay forever so it can possibly be implemented later
       
   -sug imp/implement <sugNum> [reason]
-      ^Implement a suggestion, youve done what this suggestion asked
+      ^Implement a suggestion, done what this suggestion asked/suggested
       
   -sug q/quote <sugNum>
       ^Anyone can use this, quote a suggestion
-
-Note: `-sug implement` and `-sug approve` both make it so the suggestion WILL NOT be deleted after given seconds in sugCreate.cc.lua
-Note: MAKE SURE TO PUT THE CORRECT SUGGESTION CHANEL IN CONFIG VALUES
+		
 */}}
+{{/* ~you only have to copy below this line, the above is just me telling you shit~ */}}
 
-{{/* CONFIGURATION VALUES START*/}}
+{{/* REQUIRED CONFIGURATION VALUES START*/}}
 {{ $sugChan := 796916867586719784 }} {{/* (CHANNEL ID) suggestions channel*/}}
+{{ $sugCreateCCID := 38 }} {{/* (NUMNER) the custom command number/ID of the sugCreate command*/}}
 {{ $notify := 770299126528606208 }} {{/* (CHANNEL ID) or (false) notify the author of the suggestion of mod actions to it?*/}}
 {{ $impChan := 770299126528606208 }} {{/* (CHANNEL ID) or (false) channel to send implemented suggestions to, false to disable*/}}
-{{ $rolesS := cslice 770291866208829470 }} {{/* (ROLED IDs) role(s) that can manage suggestions*/}}
+{{ $rolesS := cslice 770291866208829470 770291857783390228 }} {{/* (ROLED IDs) role(s) that can manage suggestions*/}}
+
+{{/* OPTIONAL CONFIGURATION VALUES*/}}
 {{ $reason := false }} {{/* (true) or (false), weather or not a reason is required*/}}
+{{ $Pershow := true }} {{/* (true) or (false, weather or not to show emoji count on quote and implement embeds)*/}}
 {{/* CONFIGURATION VALUES END*/}}
 
 {{/* role requirement*/}}
 {{ $mangR := false }}
 {{range .Member.Roles}} {{if in $rolesS .}}{{$mangR = true}}{{end}}{{end}}
+
+{{ define "emCount"}}
+	{{ if .Show }}
+		{{ if len .Embed.Fields}}
+			{{ (index .Embed.Fields (sub (len .Embed.Fields) 1)).Set "Inline" true }}
+		{{ end }}
+		{{ .Embed.Set "Fields" (.Embed.Fields.Append (sdict 
+			"Name" "Emoji Count"
+			"Value" (print (index .Message.Reactions 0).Emoji.Name " **»** " (index .Percents 0) " " (index .Message.Reactions 1).Emoji.Name " **»** " (index .Percents 1))
+        	"Inline" true) 
+		) }}
+	{{ end }}
+{{ end }}
 
 {{/* Reason management*/}}
 {{ if $reason }} {{ $reason = 2 }} {{ else }} {{ $reason = 1 }} {{ end }}
@@ -56,6 +80,19 @@ Note: MAKE SURE TO PUT THE CORRECT SUGGESTION CHANEL IN CONFIG VALUES
 
 	{{ $cmd := reReplace `\A-s(ug|uggestion)?\s?` .Cmd "" }}
 	{{ $action := 0 }}
+
+{{/* emoji count + percents(modded from pollDelete.cc.lua)*/}}
+		{{ $percents := cslice }} {{ $total := 0}}
+		{{ range $index, $value := $msg.Reactions }}
+			{{ if lt $index 2 }}
+				{{ $total = add $total (sub $value.Count 1) }}
+			{{ end }}
+		{{ end }}
+        {{ range $index, $value := $msg.Reactions }}
+			{{ if lt $index 2 }}
+            	{{ $percents = $percents.Append (printf "%.0f%%" (round (fdiv (sub $value.Count 1) $total|mult 100.0))) }}
+			{{ end }}
+        {{ end }}
 
 {{/* Comment add/edit*/}}
 	{{ if and $mangR (eq $cmd "com" "comment") }}
@@ -91,16 +128,19 @@ Note: MAKE SURE TO PUT THE CORRECT SUGGESTION CHANEL IN CONFIG VALUES
 		{{ $embed.Set "URL" (print "https://discord.com/channels/" .Guild.ID "/" $sugChan "/" $id) }}
 		{{ $embed.Set "Title" (print "Quote | " $embed.Title) }}
 		{{ $embed.Set "Footer" (sdict "Icon_URL" (.User.AvatarURL "256") "Text" (print "Quoted by " .User.String)) }}
-		{{ $embed.Del "Timestamp "}}
-		{{ sendMessage nil (cembed $embed)}}
+		{{ $embed.Del "Timestamp"}}
+		{{ $embed.Del "Image"}}
+		{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
+		{{ $embed = $x.Embed }}
+		{{ sendMessage nil (cembed $embed) }}
 
 {{/* Approve Suggestion*/}}
 	{{ else if and $mangR (eq $cmd "ap" "aprove") }}
 		{{ if not (reFind "APPROVE" $embed.Title)}}
 			{{ $embed.Set "Title" (reReplace `\s#` $embed.Title " (APPROVED) #") }}
 			{{ editMessage $sugChan $id (cembed $embed) }}
-			{{ dbDel 0 $db.Key }}
-			{{ dbSet 0 $db.Key $db.Value }}
+			{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
+			{{ dbSet 0 $db.Key (toString $db.Value) }}
 			{{ $action = "suggestion approved" }}
 		{{ else }}
 			This suggestion has already been approved
@@ -108,9 +148,12 @@ Note: MAKE SURE TO PUT THE CORRECT SUGGESTION CHANEL IN CONFIG VALUES
 
 {{/* Implement Suggestion*/}}
 	{{ else if and $mangR (eq $cmd "imp" "implement" "implemented") }}
+		{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
 		{{ $embed.Set "Title" (reReplace `(\(APPROVED\))?\s#` $embed.Title " (IMPLEMENTED) #") }}
 		{{ $embed.Set "Footer" (sdict "Text" (print .User.String " implemented this ")) }}
 		{{ $embed.Set "Timestamp" currentTime }}
+		{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
+		{{ $embed = $x.Embed }}
 		{{ if $impChan }}
 			{{ $embed.Set "Description" (print $embed.Description "\nReason: " $reason) }}
 			{{ sendMessage $impChan (complexMessage "content" (userArg (index $msg.Mentions 0)).Mention "embed" (cembed $embed)) }}
