@@ -1,5 +1,5 @@
 # Yagpdb+Selfhost-ccs
-I has 12 stars... damn, mind blown, and the forks, that's pretty cool. Just wow, I never thought people would like this soo much
+I wuv u all 14 stars? :3 <3 next target is Crafter's repo! 14 more stars to go!
 
 paggy and asggy commands are in go/gotmpl, yagpdb+selfhosts are done in lua, so you can see the percentage of yag vs selfhost under languages 
 
