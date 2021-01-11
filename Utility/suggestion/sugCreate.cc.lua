@@ -3,25 +3,28 @@ Made by: Crenshaw#1312
 
 Trigger Type: Regex
 Trigger: .*
-
+		
+Note: read the other file for more info :)
+~~~
 Note: ONLY ALLOW THIS TO RUN IN ONE CHANNEL (this should be your suggestion chanel)
 Note: Allow people to type in your suggestion channel
-Note: Supports attachments
-Note: You can change your upvote/downvote in line 46 (on Github)
+~~~
+Note: You can change your upvote/downvote in line 75 (on Github)
 */}}
 
-{{/* CONFIGURATION VAlUES START*/}}
+{{{/* CONFIGURATION VAlUES START*/}}
 {{ $color := 0x4B0082 }} {{/* 0x(Hex code)*/}}
-{{ $autoDel := 5 }} {{/* delete suggestions after X seconds, 0 to dissable*/}}
+{{ $autoDel := 300 }} {{/* delete suggestions after X seconds, 0 to dissable*/}}
 {{/* CONFIGURATION VALUES END*/}}
-
+ 
 {{ if .ExecData.Key }}
+	{{ (dbGet 0 .ExecData.Key).ExpiresAt }}
 	{{ if (dbGet 0 .ExecData.Key).ExpiresAt }}
 		{{ deleteMessage nil .ExecData.ID 0 }}
-		{{ dbDel 0 (print "sugs|" .sugCount) }}
+		{{ dbDel 0 (print "sugs|" .ExecData.sugCount) }}
 	{{ end }}
 {{ else }}
-
+ 
 	{{ if and (not (reFind `\A-s(ug|uggestion)?\s?(del(ete)?|deny|com(ment)?|ap(prove)?|imp(lement)?|q(oute)?)` .Cmd)) }}
 		{{/* Getting suggestion number*/}}
 		{{ $sugCount := 0 }}
@@ -32,7 +35,7 @@ Note: You can change your upvote/downvote in line 46 (on Github)
 			{{ dbSet 0 "sugCount" 1 }}
 			{{ $sugCount = 1 }}
 		{{ end }}
-
+ 
 		{{ $embed := sdict 
 	  		"Author" (sdict "Icon_URL" (.User.AvatarURL "256") "Name" .User.String)
 			"Title" (print "Suggestion #" $sugCount)
@@ -42,7 +45,7 @@ Note: You can change your upvote/downvote in line 46 (on Github)
 			"Timestamp" currentTime
 			"Footer" (sdict "Text" "Suggested")
 	 	}}
-
+ 
 	{{/* getImages.cc.lua, edited*/}}
 	  {{ $filegex := `https?://(?:\w+\.)?[\w-]+\.[\w]{2,3}(?:\/[\w-_.]+)+\.(png|jpe?g|gif|webp|mp4|mkv|mov|wav)` }}
 	  {{ $attachLinks := cslice }}
@@ -51,7 +54,7 @@ Note: You can change your upvote/downvote in line 46 (on Github)
 				{{ $attachLinks = $attachLinks.Append .URL }}
 	    	{{ end }}
 		{{ end }}
-
+ 
 		{{ $links := $attachLinks.AppendSlice (reFindAll $filegex .Message.Content) }}
 		{{ range $i,$v := $links }}
 			{{ $name := reFind `/[^/]+$` $v }} {{ $name = slice $name 1 }}
@@ -80,7 +83,7 @@ Note: You can change your upvote/downvote in line 46 (on Github)
 		{{ else }}
 			{{ dbSet 0 (print "sugs|" $sugCount) (toString $sugID) }}
 		{{ end }}
-
+ 
 		{{ deleteTrigger 1 }}
 	{{ end }}
 {{ end }}
