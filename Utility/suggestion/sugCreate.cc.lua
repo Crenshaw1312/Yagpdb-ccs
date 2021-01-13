@@ -25,7 +25,7 @@ Note: You can change your upvote/downvote in line 75 (on Github)
 	{{ end }}
 {{ else }}
  
-	{{ if and (not (reFind `\A-s(ug|uggestion)?\s?(del(ete)?|deny|com(ment)?|ap(prove)?|imp(lement)?|q(oute)?)` .Cmd)) }}
+	{{ if and (not (reFind `\A-s(ug|uggestion)?\s?\w+` .Cmd)) }}
 		{{/* Getting suggestion number*/}}
 		{{ $sugCount := 0 }}
 		{{ if ($s := (dbGet 0 "sugCount").Value) }}
