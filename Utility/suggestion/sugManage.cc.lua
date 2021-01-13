@@ -2,14 +2,15 @@
 Made by: Crenshaw#1312
 
 Trigger Type: Regex
-Trigger: \A-s(ug|uggestion(s)?)?\s?(del(ete)?|deny|com(ment)?|ap(prove)?|imp(lement)?|q(oute)?)
+Trigger: \A-s(ug|uggestion)?\s?\w+
 		
 Note: `-sug implement` and `-sug approve` both make it so the suggestion WILL NOT be deleted after given seconds in sugCreate.cc.lua
 Note: This system is much cleaner then most others due to the simplicity and databse used for it
 Note: MAKE SURE TO PUT THE CORRECT DATA/INFORMATION IN CONFIG VALUES!!!!!!!!
 ~~~~
 Note: has image and MULTIPLE file(s)/image(s) support, dynamically showed in a field
-Note: Supports multipule comments and editing them (not deletion yet though)
+Note: Supports multipule comments and editing them (and deletion)
+Note: Can show emoji count perecntages if wanted
 Note: Has quoting mechanisim
 
 Usage:
@@ -47,7 +48,11 @@ Usage:
 
 {{/* role requirement*/}}
 {{ $mangR := false }}
-{{range .Member.Roles}} {{if in $rolesS .}}{{$mangR = true}}{{end}}{{end}}
+{{range .Member.Roles }}
+	{{ if in $rolesS . }}
+		{{ $mangR = true }}
+	{{ end }}
+{{ end }}
 
 {{ define "emCount"}}
 	{{ if .Show }}
@@ -62,26 +67,59 @@ Usage:
 	{{ end }}
 {{ end }}
 
-{{/* Reason management*/}}
-{{ if $reason }} {{ $reason = 2 }} {{ else }} {{ $reason = 1 }} {{ end }}
-{{ $a := parseArgs $reason "Sug num and optional reason" (carg "int" "sugCount") (carg "string" "reason") }}
-{{ if not (reFind `\A-s(ug|uggestion)?\s?q(uote)?` .Cmd ) }}{{ if ($a.IsSet 1) }} {{ $reason = $a.Get 1 }} {{ else }} {{ $reason = "None provided" }} {{ end }} {{ end }}
+{{ define "error"}}
+	{{ $id := sendMessageRetID nil (cembed
+		"Title" "Suggestion System"
+		"Description" (joinStr "\n\n"
+			"`suggestion/suggest/sug/s <action> <sugNum> [reason]` can be used as base"
+			"`sug quote/q <sugNum> [reason]` quote a suggestion, anyone can do this"
+			"`sug comment/com <sugNum> [reason]` comment on a suggestion, if the comment starts with `\delete` or `\remove`, you can delete your comment"
+			"`sug approve/ap <sugNum> [reason]` approve a suggestion"
+			"`sug implement/imp <sugNum> [reason]` implement a suggestion"
+			"`Note: approve and implement make it so a suggestion won't be auto-deleted`"
+		)
+		"Color" 0x4B0082
+	) }}
+	{{ deleteMessage nil $id 30 }}
+{{ end }}
+
+{{/* Reason and args management*/}}
+{{ if and (not (reFind `\s?q(uote)?` .Cmd)) $reason }}
+	{{ $reason = 2 }}
+{{ else }}
+	{{ $reason = 0 }}
+{{ end }}
+
+{{ if and (lt (len .CmdArgs) 2) $reason (not (reFind `\s?q(uote)?` .Cmd)) }}
+	{{ template "error"}}
+{{ end }}
+
+{{ $a := parseArgs $reason "Reason has been made required" (carg "int" "sugCount") (carg "string" "reason") }}
+
+{{ if not (reFind `\s?q(uote)?` .Cmd ) }}
+	{{ if ($a.IsSet 1) }}
+		{{ $reason = $a.Get 1 }}
+	{{ else }}
+		{{ $reason = "None provided" }}
+	{{ end }}
+{{ end }}
 
 {{/* Getting suggestion and other data*/}}
-{{ if ($db := (dbGet 0 (print "sugs|" ($a.Get 0)))) }}
-	{{ $id := toInt $db.Value }}
-	{{ $msg := getMessage $sugChan $id }}
-	{{ $embed := structToSdict (index $msg.Embeds 0) }}
-	{{ $f := cslice }}
-	{{ range $embed.Fields }}
-		{{ $f = $f.Append (structToSdict .) }}
-	{{ end }}
-	{{ $embed.Set "Fields" $f }}
+{{ if $a.IsSet 0 }}
+	{{ if ($db := (dbGet 0 (print "sugs|" ($a.Get 0)))) }}
+		{{ $id := toInt $db.Value }}
+		{{ $msg := getMessage $sugChan $id }}
+		{{ $embed := structToSdict (index $msg.Embeds 0) }}
+		{{ $f := cslice }}
+		{{ range $embed.Fields }}
+			{{ $f = $f.Append (structToSdict .) }}
+		{{ end }}
+		{{ $embed.Set "Fields" $f }}
 
-	{{ $cmd := reReplace `\A-s(ug|uggestion)?\s?` .Cmd "" }}
-	{{ $action := 0 }}
+		{{ $cmd := reReplace `\A-s(ug|uggestion)?\s?` .Cmd "" }}
+		{{ $action := 0 }}
 
-{{/* emoji count + percents(modded from pollDelete.cc.lua)*/}}
+{{/* emoji count + percents (modded from pollDelete.cc.lua) ty piter!!!!*/}}
 		{{ $percents := cslice }} {{ $total := 0}}
 		{{ range $index, $value := $msg.Reactions }}
 			{{ if lt $index 2 }}
@@ -95,87 +133,109 @@ Usage:
         {{ end }}
 
 {{/* Comment add/edit*/}}
-	{{ if and $mangR (eq $cmd "com" "comment") }}
+		{{ if and $mangR (eq $cmd "com" "comment") }}
 {{/* Has the user already commented?*/}}
-		{{ $foundCom := false }}
-		{{ if $embed.Fields }}
-			{{ range $i, $v := $embed.Fields }}
-				{{ if eq $.User.String $v.Name }}
-					{{ $foundCom = (add $i 1) }}
+			{{ $foundCom := false }}
+			{{ if $embed.Fields }}
+				{{ range $i, $v := $embed.Fields }}
+					{{ if eq $.User.String $v.Name }}
+						{{ $foundCom = (add $i 1) }}
+					{{ end }}
 				{{ end }}
 			{{ end }}
-		{{ end }}
 {{/* handle accordingly*/}}
-		{{ if and $foundCom ($a.IsSet 1) }}
-			{{ $embed.Fields.Set (sub $foundCom 1) (sdict "Name" .User.String "Value" (print "_Comment »_ " ($a.Get 1)) "Inline" true) }}
-			{{ $action = "updated comment" }}
-		{{ else if (not ($a.IsSet 1)) }}
-  	        {{ sendMessage nil "Please place text for your comment" }}
-		{{ else if and (not $foundCom) ($a.IsSet 1) }}
-			{{ $embed.Set "Fields" ($embed.Fields.Append (sdict "Name" .User.String "Value" (print "_Comment »_ " ($a.Get 1)) "Inline" true)) }}
-			{{ $action = "added comment" }}
-		{{ end }}
-		{{ editMessage $sugChan $id (cembed $embed) }}
+			{{ if and $foundCom ($a.IsSet 1) }}
+{{/* Delete comment*/}}
+				{{- if reFind `\A\s?\\(rem(ove)?|del(ete)?)\s?` ($a.Get 1) -}}
+					{{ $newFields := cslice }}
+					{{ range $embed.Fields }}
+						{{ if ne $.User.String .Name }}
+							{{ $newFields = $newFields.Append . }}
+						{{ end }}
+					{{ end }}
+					{{ $embed.Set "Fields" $newFields }}
+					{{ $reason = reReplace `\A\s?\\(rem(ove)?|del(ete)?)\s?` ($a.Get 1) "" }}
+					{{ if or (not $reason) (eq $reason " ") }} {{ $reason = "None Provided" }} {{ end }}
+					{{ $action = "deleted comment" }}
+{{/* Edit Comment*/}}
+				{{ else }}
+					{{ $embed.Fields.Set (sub $foundCom 1) (sdict "Name" .User.String "Value" (print "_Comment »_ " ($a.Get 1)) "Inline" true) }}
+					{{ $action = "updated comment" }}
+				{{ end }}
+{{/* Error attempting comment*/}}
+			{{ else if (not ($a.IsSet 1)) }}
+	  	        {{ sendMessage nil "Please place text for your comment" }}
+{{/* Add Comment*/}}
+			{{ else if and (not $foundCom) ($a.IsSet 1) }} 
+				{{ $embed.Set "Fields" ($embed.Fields.Append (sdict "Name" .User.String "Value" (print "_Comment »_ " ($a.Get 1)) "Inline" true)) }}
+				{{ $action = "added comment" }}
+			{{ end }}
+			{{ editMessage $sugChan $id (cembed $embed) }}
 
 {{/* Delete suggestion*/}}
-	{{ else if and $mangR (eq $cmd "del" "delete" "deny") }}
-		{{ deleteMessage $sugChan $id 0 }}
-		{{ dbDel 0 $db.Key }}
-		{{ $action = "deleted suggestion" }}
+		{{ else if and $mangR (eq $cmd "del" "delete" "deny") }}
+			{{ deleteMessage $sugChan $id 0 }}
+			{{ dbDel 0 $db.Key }}
+			{{ $action = "deleted suggestion" }}
 
 {{/* Quote suggestion*/}}
-	{{ else if eq $cmd "q" "qoute" }}
-		{{ $embed.Set "URL" (print "https://discord.com/channels/" .Guild.ID "/" $sugChan "/" $id) }}
-		{{ $embed.Set "Title" (print "Quote | " $embed.Title) }}
-		{{ $embed.Set "Footer" (sdict "Icon_URL" (.User.AvatarURL "256") "Text" (print "Quoted by " .User.String)) }}
-		{{ $embed.Del "Timestamp"}}
-		{{ $embed.Del "Image"}}
-		{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
-		{{ $embed = $x.Embed }}
-		{{ sendMessage nil (cembed $embed) }}
-
+		{{ else if eq $cmd "q" "qoute" }}
+			{{ $embed.Set "URL" (print "https://discord.com/channels/" .Guild.ID "/" $sugChan "/" $id) }}
+			{{ $embed.Set "Title" (print "Quote | " $embed.Title) }}
+			{{ $embed.Set "Footer" (sdict "Icon_URL" (.User.AvatarURL "256") "Text" (print "Quoted by " .User.String)) }}
+			{{ $embed.Del "Timestamp"}}
+			{{ $embed.Del "Image"}}
+			{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
+			{{ $embed = $x.Embed }}
+			{{ sendMessage nil (cembed $embed) }}
+	
 {{/* Approve Suggestion*/}}
-	{{ else if and $mangR (eq $cmd "ap" "aprove") }}
-		{{ if not (reFind "APPROVE" $embed.Title)}}
-			{{ $embed.Set "Title" (reReplace `\s#` $embed.Title " (APPROVED) #") }}
-			{{ editMessage $sugChan $id (cembed $embed) }}
-			{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
-			{{ dbSet 0 $db.Key (toString $db.Value) }}
-			{{ $action = "suggestion approved" }}
-		{{ else }}
-			This suggestion has already been approved
-		{{ end }}
+		{{ else if and $mangR (eq $cmd "ap" "app" "approve") }}
+			{{ if not (reFind "APPROVE" $embed.Title)}}
+				{{ $embed.Set "Title" (reReplace `\s#` $embed.Title " (APPROVED) #") }}
+				{{ editMessage $sugChan $id (cembed $embed) }}
+				{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
+				{{ dbSet 0 $db.Key (toString $db.Value) }}
+				{{ $action = "suggestion approved" }}
+			{{ else }}
+				This suggestion has already been approved
+			{{ end }}
 
 {{/* Implement Suggestion*/}}
-	{{ else if and $mangR (eq $cmd "imp" "implement" "implemented") }}
-		{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
-		{{ $embed.Set "Title" (reReplace `(\(APPROVED\))?\s#` $embed.Title " (IMPLEMENTED) #") }}
-		{{ $embed.Set "Footer" (sdict "Text" (print .User.String " implemented this ")) }}
-		{{ $embed.Set "Timestamp" currentTime }}
-		{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
-		{{ $embed = $x.Embed }}
-		{{ if $impChan }}
-			{{ $embed.Set "Description" (print $embed.Description "\nReason: " $reason) }}
-			{{ sendMessage $impChan (complexMessage "content" (userArg (index $msg.Mentions 0)).Mention "embed" (cembed $embed)) }}
-			{{ deleteMessage $sugChan $id 0 }}
-			{{ $action = 0 }}
+		{{ else if and $mangR (eq $cmd "imp" "implement" "implemented") }}
+			{{ $embed.Set "Title" (reReplace `(\(APPROVED\))?\s#` $embed.Title " (IMPLEMENTED) #") }}
+			{{ $embed.Set "Footer" (sdict "Text" (print .User.String " implemented this ")) }}
+			{{ $embed.Set "Timestamp" currentTime }}
+			{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
+			{{ $embed = $x.Embed }}
+			{{ if $impChan }}
+				{{ $embed.Set "Description" (print $embed.Description "\nReason: " $reason) }}
+				{{ sendMessage $impChan (complexMessage "content" (userArg (index $msg.Mentions 0)).Mention "embed" (cembed $embed)) }}
+				{{ deleteMessage $sugChan $id 0 }}
+				{{ $action = 0 }}
+			{{ else }}
+				{{ editMessage $sugChan $id (cembed $embed) }}
+				{{ $action = "suggestion implemented" }}
+			{{ end }}
+			{{ dbDel 0 $db.Key }}
+
+{{/* Error*/}}
 		{{ else }}
-			{{ editMessage $sugChan $id (cembed $embed) }}
-			{{ $action = "suggestion implemented" }}
+			{{ template "error"}}
 		{{ end }}
-		{{ dbDel 0 $db.Key }}
-	{{ end }}
 
 {{/* Notfiy?*/}}
-	{{ if and $notify $action }}
-		{{ sendMessage $notify (complexMessage "content" (userArg (index $msg.Mentions 0)).Mention "embed" (cembed
-			"Title" (title $action)
-			"Description" (print "[Suggestion #" ($a.Get 0) "](" (print "https://discord.com/channels/" .Guild.ID "/" $sugChan "/" $id) ") action was done by " .User.Mention "\nReason: " $reason)
-			"Color" $embed.Color
-		)) }}
+		{{ if and $notify $action }}
+			{{ sendMessage $notify (complexMessage "content" (userArg (index $msg.Mentions 0)).Mention "embed" (cembed
+				"Title" (title $action)
+				"Description" (print "[Suggestion #" ($a.Get 0) "](" (print "https://discord.com/channels/" .Guild.ID "/" $sugChan "/" $id) ") action was done by " .User.Mention "\nReason: " $reason)
+				"Color" $embed.Color
+			)) }}
+		{{ end }}
+	{{ else }}
+		{{ template "error"}}
 	{{ end }}
-
 {{ else }}
-Invalid suggestion number
+	{{ template "error"}}
 {{ end }}
 {{ deleteTrigger 5}}
