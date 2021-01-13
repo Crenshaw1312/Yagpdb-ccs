@@ -173,7 +173,8 @@ Usage:
 			{{ editMessage $sugChan $id (cembed $embed) }}
 
 {{/* Delete suggestion*/}}
-		{{ else if and $mangR (eq $cmd "del" "delete" "deny") }}
+{{/* Delete suggestion*/}}
+		{{ else if and (or $mangR (eq .User.String (userArg (index $msg.Mentions 0)).String)) (eq $cmd "del" "delete" "deny") }}
 			{{ deleteMessage $sugChan $id 0 }}
 			{{ dbDel 0 $db.Key }}
 			{{ $action = "deleted suggestion" }}
