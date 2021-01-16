@@ -73,7 +73,7 @@ Usage:
 		"Description" (joinStr "\n\n"
 			"`suggestion/suggest/sug/s <action> <sugNum> [reason]` can be used as base"
 			"`sug quote/q <sugNum> [reason]` quote a suggestion, anyone can do this"
-			"`sug comment/com <sugNum> [reason]` comment on a suggestion, if the comment starts with `\delete` or `\remove`, you can delete your comment"
+			"`sug comment/com <sugNum> [reason]` comment on a suggestion"
 			"`sug approve/ap <sugNum> [reason]` approve a suggestion"
 			"`sug implement/imp <sugNum> [reason]` implement a suggestion"
 			"`Note: approve and implement make it so a suggestion won't be auto-deleted`"
@@ -84,19 +84,19 @@ Usage:
 {{ end }}
 
 {{/* Reason and args management*/}}
-{{ if and (not (reFind `\s?q(uote)?` .Cmd)) $reason }}
+{{ if and (not (reFind `\s?(q(uote)?|l(ist)?)\s?` .Cmd)) $reason }}
 	{{ $reason = 2 }}
 {{ else }}
 	{{ $reason = 0 }}
 {{ end }}
 
-{{ if and (lt (len .CmdArgs) 2) $reason (not (reFind `\s?q(uote)?` .Cmd)) }}
+{{ if and (lt (len .CmdArgs) 2) $reason (not (reFind `\s?(q(uote)?|l(ist)?)\s?` .Cmd)) }}
 	{{ template "error"}}
 {{ end }}
 
 {{ $a := parseArgs $reason "Reason has been made required" (carg "int" "sugCount") (carg "string" "reason") }}
 
-{{ if not (reFind `\s?q(uote)?` .Cmd ) }}
+{{ if not (reFind `\s?(q(uote)?|l(ist)?)\s?` .Cmd ) }}
 	{{ if ($a.IsSet 1) }}
 		{{ $reason = $a.Get 1 }}
 	{{ else }}
@@ -121,11 +121,7 @@ Usage:
 
 {{/* emoji count + percents (modded from pollDelete.cc.lua) ty piter!!!!*/}}
 		{{ $percents := cslice }} {{ $total := 0}}
-		{{ range $index, $value := $msg.Reactions }}
-			{{ if lt $index 2 }}
-				{{ $total = add $total (sub $value.Count 1) }}
-			{{ end }}
-		{{ end }}
+		{{ $total = sub (add (index $msg.Reactions 0).Count (index $msg.Reactions 1).Count) 2 }}
         {{ range $index, $value := $msg.Reactions }}
 			{{ if lt $index 2 }}
             	{{ $percents = $percents.Append (printf "%.0f%%" (round (fdiv (sub $value.Count 1) $total|mult 100.0))) }}
@@ -173,7 +169,6 @@ Usage:
 			{{ editMessage $sugChan $id (cembed $embed) }}
 
 {{/* Delete suggestion*/}}
-{{/* Delete suggestion*/}}
 		{{ else if and (or $mangR (eq .User.String (userArg (index $msg.Mentions 0)).String)) (eq $cmd "del" "delete" "deny") }}
 			{{ deleteMessage $sugChan $id 0 }}
 			{{ dbDel 0 $db.Key }}
@@ -189,7 +184,7 @@ Usage:
 			{{ template "emCount" ($x := sdict "Embed" $embed "Message" $msg "Percents" $percents "Show" $Pershow) }}
 			{{ $embed = $x.Embed }}
 			{{ sendMessage nil (cembed $embed) }}
-	
+
 {{/* Approve Suggestion*/}}
 		{{ else if and $mangR (eq $cmd "ap" "app" "approve") }}
 			{{ if not (reFind "APPROVE" $embed.Title)}}
@@ -204,6 +199,9 @@ Usage:
 
 {{/* Implement Suggestion*/}}
 		{{ else if and $mangR (eq $cmd "imp" "implement" "implemented") }}
+			{{ if not (reFind "APPROVED" $embed.Title) }}
+				{{ cancelScheduledUniqueCC $sugCreateCCID ($a.Get 0) }}
+			{{ end }}
 			{{ $embed.Set "Title" (reReplace `(\(APPROVED\))?\s#` $embed.Title " (IMPLEMENTED) #") }}
 			{{ $embed.Set "Footer" (sdict "Text" (print .User.String " implemented this ")) }}
 			{{ $embed.Set "Timestamp" currentTime }}
@@ -221,7 +219,7 @@ Usage:
 			{{ dbDel 0 $db.Key }}
 
 {{/* Error*/}}
-		{{ else }}
+		{{ else if not (reFind `l(ist)?` .Cmd) }}
 			{{ template "error"}}
 		{{ end }}
 
@@ -233,10 +231,61 @@ Usage:
 				"Color" $embed.Color
 			)) }}
 		{{ end }}
-	{{ else }}
+	{{ else if not (reFind `l(ist)?` .Cmd) }}
 		{{ template "error"}}
 	{{ end }}
-{{ else }}
+{{ else if not (reFind `l(ist)?` .Cmd) }}
 	{{ template "error"}}
+{{ end }}
+{{/* list suggestions*/}}
+{{ if (reFind `\s?l(ist)?\s?` .Cmd) }}
+	{{ $page := or ($a.Get 0) 1 }}
+	{{ $skip := mult (sub $page 1) 10 }}
+	{{ $sugs := dbTopEntries "sugs|%" 10 $skip }}
+	{{ with $sugs }}
+		{{ $e := sdict
+			"Title" "Suggestions"
+			"Fields" (cslice)
+			"Color" 0x4B0082
+			"Footer" (sdict "Text" "sugs list [page num]")
+		}}
+		{{ range $i, $v := .}}
+{{/* getting vars*/}}
+			{{ $msg := getMessage $sugChan (toInt $v.Value) }}
+			{{ $sug := structToSdict (index $msg.Embeds 0) }}
+			{{ $f := cslice }}
+				{{ range $sug.Fields }}
+					{{ $f = $f.Append (structToSdict .) }}
+				{{ end }}
+			{{ $sug.Set "Fields" $f }}
+{{/* percents*/}}
+			{{ $percents := cslice }} {{ $total := 0}}
+			{{ $total = sub (add (index $msg.Reactions 0).Count (index $msg.Reactions 1).Count) 2 }}
+        	{{ range $index, $value := $msg.Reactions }}
+				{{ if lt $index 2 }}
+            		{{ $percents = $percents.Append (printf "%.0f%%" (round (fdiv (sub $value.Count 1) $total|mult 100.0))) }}
+				{{ end }}
+    	    {{ end }}
+{{/* Attachments*/}}
+			{{ $atts := "None" }}
+			{{ range $i, $v := $sug.Fields }}
+				{{ if eq $v.Name "Attachments" }}
+					{{ $atts = (joinStr ", " (split $v.Value "\n")) }}
+				{{ end }}
+			{{ end }}
+{{/* Making display*/}}
+			{{ $e.Set "Fields" ($e.Fields.Append (sdict 
+				"Name" (print  "Suggestion #" (slice $v.Key 5) " - " (reReplace `\[\"|\"\]` (json (reFindAll "APPROVED" $sug.Title)) "")) 
+				"Value" (print " __" $sug.Author.Name "__: "  
+					$sug.Description "\n"
+                         "__Attachments__: " $atts "\n_"
+					(index $msg.Reactions 0).Emoji.Name (index $percents 0) " " (index $msg.Reactions 1).Emoji.Name " " (index $percents 1) "_")
+				"Inline" false))
+			}}
+		{{ end }}
+		{{ sendMessage nil (cembed $e) }}
+	{{ else }}
+		There were no suggestions.
+	{{ end }}
 {{ end }}
 {{ deleteTrigger 5}}
