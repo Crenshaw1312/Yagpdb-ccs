@@ -18,7 +18,6 @@ Note: You can change your upvote/downvote in line 75 (on Github)
 {{/* CONFIGURATION VALUES END*/}}
  
 {{ if .ExecData.Key }}
-	{{ (dbGet 0 .ExecData.Key).ExpiresAt }}
 	{{ if (dbGet 0 .ExecData.Key).ExpiresAt }}
 		{{ deleteMessage nil .ExecData.ID 0 }}
 		{{ dbDel 0 (print "sugs|" .ExecData.sugCount) }}
