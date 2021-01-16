@@ -275,7 +275,7 @@ Usage:
 			{{ end }}
 {{/* Making display*/}}
 			{{ $e.Set "Fields" ($e.Fields.Append (sdict 
-				"Name" (print  "Suggestion #" (slice $v.Key 5) " - " (reReplace `\[\"|\"\]` (json (reFindAll "APPROVED" $sug.Title)) "")) 
+				"Name" (reReplace `\[\"|\"\]|\s\-\snull` (print  "Suggestion #" (slice $v.Key 5) " - " (json (reFindAll "APPROVED" $sug.Title))) "") 
 				"Value" (print " __" $sug.Author.Name "__: "  
 					$sug.Description "\n"
                          "__Attachments__: " $atts "\n_"
