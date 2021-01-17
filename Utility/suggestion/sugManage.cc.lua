@@ -2,7 +2,7 @@
 Made by: Crenshaw#1312
 
 Trigger Type: Regex
-Trigger: \A-s(ug|uggestion)?\s?\w+
+Trigger: \A-s(ug(s|gestion(s)?)?)\s\w+
 		
 Note: `-sug implement` and `-sug approve` both make it so the suggestion WILL NOT be deleted after given seconds in sugCreate.cc.lua
 Note: This system is much cleaner then most others due to the simplicity and databse used for it
@@ -74,7 +74,7 @@ Usage:
 	{{ $id := sendMessageRetID nil (cembed
 		"Title" "Suggestion System"
 		"Description" (joinStr "\n\n"
-			"`suggestion/suggest/sug/s <action> <sugNum> [reason]` can be used as base"
+			"`suggestion/suggest/sug/sugs/s <action> <sugNum> [reason]` can be used as base"
 			"`sug quote/q <sugNum> [reason]` quote a suggestion, anyone can do this"
 			"`sug comment/com <sugNum> [reason]` comment on a suggestion"
 			"`sug approve/ap <sugNum> [reason]` approve a suggestion"
