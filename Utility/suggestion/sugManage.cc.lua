@@ -30,6 +30,9 @@ Usage:
       
   -sug q/quote <sugNum>
       ^Anyone can use this, quote a suggestion
+			
+  -sug l/list [page num]
+      ^Anyone can use this, lists all suggestions in groups of 10
 		
 */}}
 {{/* ~you only have to copy below this line, the above is just me telling you shit~ */}}
@@ -76,6 +79,7 @@ Usage:
 			"`sug comment/com <sugNum> [reason]` comment on a suggestion"
 			"`sug approve/ap <sugNum> [reason]` approve a suggestion"
 			"`sug implement/imp <sugNum> [reason]` implement a suggestion"
+			"`sug` l/list [page num] kist suggestions"
 			"`Note: approve and implement make it so a suggestion won't be auto-deleted`"
 		)
 		"Color" 0x4B0082
