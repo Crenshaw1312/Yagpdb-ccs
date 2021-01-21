@@ -10,7 +10,7 @@ look at the README.md in this folder for more
 Note: You can delete line 17 ("Thumbnail...) if you don't want github pfp to show.
 */}}
 
-    {{ $pfp := $.ReactionMessage.Author.AvatarURL "256" }}
+   {{ $pfp := $.ReactionMessage.Author.AvatarURL "256" }}
 		{{ if eq $.ReactionMessage.Author.Avatar "df91181b3f1cf0ef1592fbe18e0962d7" }}
 			{{ $embed = sdict
     	  "Author" .Author
@@ -22,7 +22,9 @@ Note: You can delete line 17 ("Thumbnail...) if you don't want github pfp to sho
 				"Footer" (sdict "icon_url" $pfp "Text" "Github")
 				"Color" (or $color .Color)
 			}}
-		{{ else if and (eq .Provider.Name "GitHub") (ge .Thumbnail.Width 500) (ge .Thumbnail.Width 250) }}
-			{{ $embed.Set "Image" .Thumbnail }}
-			{{ $embed.Del "Thumbnail" }}
+		{{ else if .Provider }}
+        		{{ if and (eq .Provider.Name "GitHub") (ge .Thumbnail.Width 500) (ge .Thumbnail.Width 250) }}
+				{{ $embed.Set "Image" .Thumbnail }}
+				{{ $embed.Del "Thumbnail" }}
+        		{{ end }}
 		{{ end }}
