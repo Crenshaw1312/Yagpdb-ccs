@@ -12,6 +12,8 @@ Note: has image and MULTIPLE file(s)/image(s) support, dynamically showed in a f
 Note: Supports multipule comments and editing them (and deletion)
 Note: Can show emoji count perecntages if wanted
 Note: Has quoting mechanisim
+~~~~
+NOTICE: You may need to use a minifier, although this may cause issues. Try removing some blank lines and such if minifier does not work
 
 Usage:
   Base: -suggestion/-sug/-s
@@ -37,14 +39,12 @@ Usage:
 */}}
 {{/* ~you only have to copy below this line, the above is just me telling you shit~ */}}
 
-{{/* REQUIRED CONFIGURATION VALUES START*/}}
+{{/* CONFIGURATION VALUES START*/}}
 {{ $sugChan := 796916867586719784 }} {{/* (CHANNEL ID) suggestions channel*/}}
-{{ $sugCreateCCID := 38 }} {{/* (NUMNER) the custom command number/ID of the sugCreate command*/}}
+{{ $sugCreateCCID := 38 }} {{/*the custom command number/ID of the sugCreate command*/}}
 {{ $notify := 770299126528606208 }} {{/* (CHANNEL ID) or (false) notify the author of the suggestion of mod actions to it?*/}}
 {{ $impChan := 770299126528606208 }} {{/* (CHANNEL ID) or (false) channel to send implemented suggestions to, false to disable*/}}
-{{ $rolesS := cslice 770291866208829470 770291857783390228 }} {{/* (ROLED IDs) role(s) that can manage suggestions*/}}
-
-{{/* OPTIONAL CONFIGURATION VALUES*/}}
+{{ $rolesS := cslice 770291866208829470 }} {{/* (ROLED IDs) role(s) that can manage suggestions*/}}
 {{ $reason := false }} {{/* (true) or (false), weather or not a reason is required*/}}
 {{ $Pershow := true }} {{/* (true) or (false, weather or not to show emoji count on quote and implement embeds)*/}}
 {{/* CONFIGURATION VALUES END*/}}
@@ -74,12 +74,12 @@ Usage:
 	{{ $id := sendMessageRetID nil (cembed
 		"Title" "Suggestion System"
 		"Description" (joinStr "\n\n"
-			"`suggestion/suggest/sug/sugs/s <action> <sugNum> [reason]` can be used as base"
+			"`suggestion/suggest/sug/s <action> <sugNum> [reason]` can be used as base"
 			"`sug quote/q <sugNum> [reason]` quote a suggestion, anyone can do this"
-			"`sug comment/com <sugNum> [reason]` comment on a suggestion"
 			"`sug approve/ap <sugNum> [reason]` approve a suggestion"
 			"`sug implement/imp <sugNum> [reason]` implement a suggestion"
 			"`sug` l/list [page num] kist suggestions"
+			"`sug comment/com <sugNum> [comment][\\delete]` comment on a suggestion (or delete one)"
 			"`Note: approve and implement make it so a suggestion won't be auto-deleted`"
 		)
 		"Color" 0x4B0082
@@ -255,37 +255,38 @@ Usage:
 		}}
 		{{ range $i, $v := .}}
 {{/* getting vars*/}}
-			{{ $msg := getMessage $sugChan (toInt $v.Value) }}
-			{{ $sug := structToSdict (index $msg.Embeds 0) }}
-			{{ $f := cslice }}
-				{{ range $sug.Fields }}
-					{{ $f = $f.Append (structToSdict .) }}
-				{{ end }}
-			{{ $sug.Set "Fields" $f }}
+			{{ if ($msg := getMessage $sugChan (toInt $v.Value)) }}
+				{{ $sug := structToSdict (index $msg.Embeds 0) }}
+				{{ $f := cslice }}
+					{{ range $sug.Fields }}
+						{{ $f = $f.Append (structToSdict .) }}
+					{{ end }}
+				{{ $sug.Set "Fields" $f }}
 {{/* percents*/}}
-			{{ $percents := cslice }} {{ $total := 0}}
-			{{ $total = sub (add (index $msg.Reactions 0).Count (index $msg.Reactions 1).Count) 2 }}
-        	{{ range $index, $value := $msg.Reactions }}
-				{{ if lt $index 2 }}
-            		{{ $percents = $percents.Append (printf "%.0f%%" (round (fdiv (sub $value.Count 1) $total|mult 100.0))) }}
-				{{ end }}
-    	    {{ end }}
+				{{ $percents := cslice }} {{ $total := 0}}
+				{{ $total = sub (add (index $msg.Reactions 0).Count (index $msg.Reactions 1).Count) 2 }}
+        		{{ range $index, $value := $msg.Reactions }}
+					{{ if lt $index 2 }}
+            			{{ $percents = $percents.Append (printf "%.0f%%" (round (fdiv (sub $value.Count 1) $total|mult 100.0))) }}
+					{{ end }}
+    	    	{{ end }}
 {{/* Attachments*/}}
-			{{ $atts := "None" }}
-			{{ range $i, $v := $sug.Fields }}
-				{{ if eq $v.Name "Attachments" }}
-					{{ $atts = (joinStr ", " (split $v.Value "\n")) }}
+				{{ $atts := "None" }}
+				{{ range $i, $v := $sug.Fields }}
+					{{ if eq $v.Name "Attachments" }}
+						{{ $atts = (joinStr ", " (split $v.Value "\n")) }}
+					{{ end }}
 				{{ end }}
-			{{ end }}
 {{/* Making display*/}}
-			{{ $e.Set "Fields" ($e.Fields.Append (sdict 
-				"Name" (reReplace `\[\"|\"\]|\s\-\snull` (print  "Suggestion #" (slice $v.Key 5) " - " (json (reFindAll "APPROVED" $sug.Title))) "") 
-				"Value" (print " __" $sug.Author.Name "__: "  
-					$sug.Description "\n"
-                         "__Attachments__: " $atts "\n_"
-					(index $msg.Reactions 0).Emoji.Name (index $percents 0) " " (index $msg.Reactions 1).Emoji.Name " " (index $percents 1) "_")
-				"Inline" false))
-			}}
+				{{ $e.Set "Fields" ($e.Fields.Append (sdict 
+					"Name" (reReplace `\[\"|\"\]|\s\-\snull` (print  "Suggestion #" (slice $v.Key 5) " - " (json (reFindAll "APPROVED" $sug.Title))) "") 
+					"Value" (print " __" $sug.Author.Name "__: "  
+						$sug.Description "\n"
+                    	"__Attachments__: " $atts "\n_"
+						(index $msg.Reactions 0).Emoji.Name (index $percents 0) " " (index $msg.Reactions 1).Emoji.Name " " (index $percents 1) "_")
+						"Inline" false))
+				}}
+			{{ end }}
 		{{ end }}
 		{{ sendMessage nil (cembed $e) }}
 	{{ else }}
