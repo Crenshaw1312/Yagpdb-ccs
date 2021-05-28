@@ -1,5 +1,5 @@
 # Yagpdb+Selfhost-ccs
-I wuv u all 14 stars? :3 <3 next target is Crafter's repo! 14 more stars to go!
+I wuv u all 20 stars? :3 <3 next target is Wolf's repo! 14 more stars to go!
 
 paggy and asggy commands are in go/gotmpl, yagpdb+selfhosts are done in lua, so you can see the percentage of yag vs selfhost under languages 
 
@@ -14,7 +14,7 @@ This is more for promos and shit
 I'm very proud of it with it's very high levels of customizbility
 - [Devonte's Counting system](https://github.com/NaruDevnote/yagpdb-ccs/tree/master/counting)
 Much better then the one on the yagpdb support server
-- [Crafter's db shit](https://github.com/TheHDCrafter/yagpdb-cc/tree/master/Crafter's%20db%20shit)
+- [Black Wolf's database management](https://www.github.com/BlackWolfWoof/yagpdb-cc/tree/master/Database_Management)
 I've found that people really like this and find it useful
 - [Crenshaw's Tagv2 CC](https://github.com/Crenshaw1312/Yagpdb-ccs/blob/master/Utility/tagV2.cc.lua)
 I've done so much shit to this CC (orignally Joe's) it's totally different (higly modded lel)
